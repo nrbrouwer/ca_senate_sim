@@ -32,7 +32,7 @@ jobs:
 
       - name: Install R packages
         run: |
-          R -q -e "req <- c('readr','dplyr','gt','janitor'); inst <- req[!req %in% installed.packages()[,'Package']]; if(length(inst)) install.packages(inst)"
+          R -q -e "req <- c('readr','dplyr','gt','janitor', 'readxl'); inst <- req[!req %in% installed.packages()[,'Package']]; if(length(inst)) install.packages(inst)"
 
       - name: Render site
         uses: quarto-dev/quarto-actions/render@v2

@@ -8,8 +8,6 @@ execute:
   error: true  
 ---
 
-## Setup
-
 testing vote table
 
 ```{r}
