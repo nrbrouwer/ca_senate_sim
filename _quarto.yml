@@ -1,6 +1,8 @@
 project:
   type: website
   output-dir: docs
+  pre-render:
+    - Rscript scripts/make_bill_pages.R
 
 website:
   title: "UC Merced CA Legislative Simulation -- 2025"

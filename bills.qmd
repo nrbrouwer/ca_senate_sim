@@ -15,10 +15,12 @@ bills <- read_excel("bill_list.xlsx")
 
 bills$Link <- paste0("[View Bill](Bills/bill_", bills$bill_number, ".pdf)")
 
+bills$Page <- paste0("[Page](bills-pages/bill_", bills$bill_number, ".html)")
+
 # simple nice table with kableExtra
 bills %>%
   gt() %>%
-  fmt_markdown(columns = "Link") %>%
+  fmt_markdown(columns = c("PDF", "Page")) %>%
   tab_header(
     title = "Bills Table",
     subtitle = "Click a link to open the corresponding PDF"
