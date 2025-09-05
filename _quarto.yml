@@ -1,6 +1,5 @@
 project:
   type: website
-  output-dir: docs
   pre-render:
     - Rscript scripts/make_bill_pages.R
 
@@ -8,17 +7,21 @@ website:
   title: "UC Merced CA Legislative Simulation -- 2025"
   navbar:
     left:
-      - href: index.qmd
-        text: Home
-      - bills.qmd
-      - senators.qmd
-      - votes.qmd
+      - text: Home
+        href: index.qmd
+      - text: Bills
+        href: bills.qmd
+      - text: Senators
+        href: senators.qmd
+      - text: Votes
+        href: votes.qmd
 
 format:
   html:
     theme: cosmo
     css: styles.css
     toc: true
+
 
 
 
