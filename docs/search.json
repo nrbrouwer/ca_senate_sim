@@ -5,5 +5,19 @@
     "title": "ca_senate_sim",
     "section": "",
     "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "This website is a test for hosting simulation information on a public webpage."
+  },
+  {
+    "objectID": "bills.html",
+    "href": "bills.html",
+    "title": "Bills",
+    "section": "",
+    "text": "Warning: package 'gt' was built under R version 4.4.2\n\n\n\n\n\n\n\n\nBills Table\n\n\nClick a link to open the corresponding PDF\n\n\nbill_number\ntitle\nauthor\nlobbyist\nLink\n\n\n\n\n1\npepsi\ndemar derozen\nNA\nView Bill\n\n\n2\nsprite\nalperen sengun\nNA\nView Bill\n\n\n3\nthis is a really long title to test how the table will hold a really long title and make sure it doesn't look ugly this is a really looooooooooooooooooooooooooooooooooong title\ntyrese maxey\nNA\nView Bill\n\n\n4\noreos\nJoel Embiid\nNA\nView Bill"
   }
 ]

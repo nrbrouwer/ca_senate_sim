@@ -1,8 +1,26 @@
 ---
 title: "Bills"
-editor: visual
+format: html
+execute:
+  echo: false
 ---
 
 
-## This is a test page where bills will go
----
+```{r}
+library(readxl)
+library(gt)
+
+# read the first sheet of your Excel file
+bills <- read_excel("bill_list.xlsx")
+
+bills$Link <- paste0("[View Bill](Bills/bill_", bills$bill_number, ".pdf)")
+
+# simple nice table with kableExtra
+bills %>%
+  gt() %>%
+  fmt_markdown(columns = "Link") %>%
+  tab_header(
+    title = "Bills Table",
+    subtitle = "Click a link to open the corresponding PDF"
+  )
+```
