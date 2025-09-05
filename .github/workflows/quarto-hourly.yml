@@ -23,16 +23,17 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Cache R packages
-        uses: actions/cache@v4
+      - name: Install R deps (auto)
+        uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          path: ~/.cache/R
-          key: ${{ runner.os }}-r-${{ hashFiles('**/DESCRIPTION') }}
-          restore-keys: ${{ runner.os }}-r-
-
-      - name: Install R packages
-        run: |
-          R -q -e "req <- c('readr','dplyr','gt','janitor', 'readxl'); inst <- req[!req %in% installed.packages()[,'Package']]; if(length(inst)) install.packages(inst)"
+          extra-packages: |
+            any::readr
+            any::dplyr
+            any::gt
+            any::janitor
+            any::readxl
+            any::knitr
+            any::rmarkdown
 
       - name: Render site
         uses: quarto-dev/quarto-actions/render@v2
