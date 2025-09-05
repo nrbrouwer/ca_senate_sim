@@ -12,8 +12,7 @@ website:
         text: Home
       - bills.qmd
       - senators.qmd
-      - text: Votes
-        href: votes.qmd
+      - votes.qmd
 
 format:
   html:
