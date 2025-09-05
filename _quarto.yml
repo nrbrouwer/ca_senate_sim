@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "ca_senate_sim"
+  title: "UC Merced CA Legislative Simulation -- 2025"
   navbar:
     left:
       - href: index.qmd
