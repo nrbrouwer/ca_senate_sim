@@ -54,5 +54,19 @@
     "title": "oreos",
     "section": "",
     "text": "View the PDF"
+  },
+  {
+    "objectID": "votes.html",
+    "href": "votes.html",
+    "title": "Votes",
+    "section": "",
+    "text": "testing vote table\n\n\n\n\n\n\n\n\nVotes\n\n\nLast updated: 2025-09-05 11:08 PDT\n\n\nbill\nhurtado\nweiner\ngrove\njohnson\n\n\n\n\n1\n1\n0\n0\n0\n\n\n2\n1\n—\n0\n0\n\n\n3\n1\n1\n0\n1\n\n\n4\n1\n1\n1\n1\n\n\n\nSource: Google Sheet (published CSV)"
+  },
+  {
+    "objectID": "votes.html#setup",
+    "href": "votes.html#setup",
+    "title": "Votes",
+    "section": "",
+    "text": "testing vote table\n\n\n\n\n\n\n\n\nVotes\n\n\nLast updated: 2025-09-05 11:08 PDT\n\n\nbill\nhurtado\nweiner\ngrove\njohnson\n\n\n\n\n1\n1\n0\n0\n0\n\n\n2\n1\n—\n0\n0\n\n\n3\n1\n1\n0\n1\n\n\n4\n1\n1\n1\n1\n\n\n\nSource: Google Sheet (published CSV)"
   }
 ]

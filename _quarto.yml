@@ -10,9 +10,10 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - about.qmd
       - bills.qmd
       - senators.qmd
+      - text: Votes
+        href: votes.qmd
 
 format:
   html:
