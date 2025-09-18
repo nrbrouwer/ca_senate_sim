@@ -27,11 +27,18 @@ library(janitor)
 votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=0&single=true&output=csv"   
 
 # --- READ ---
-dat <- readr::read_csv(votes_csv, show_col_types = FALSE) |>
+dat <- readr::read_csv(votes_csv, show_col_types = FALSE, encoding = "UTF-8") |>
   janitor::clean_names()
 
-# --- OPTIONAL transforms ---
-# dat <- dat |> mutate(vote_share = scales::percent(vote_share))
+# --- Transformation ---
+dat <- dat %>%
+  mutate(yes = sum(c_across(2:5) == 1, na.rm = TRUE), #change rows depending on number of senators
+        no = sum(c_across(2:5) == 0, na.rm = TRUE),
+        absent = sum(c_across(2:5) == "", na.rm = TRUE),
+        Vote = paste(yes, no, absent, sep = "—")) %>%
+  select(Bill, Vote, Result) 
+
+
 
 # --- RENDER with gt ---
 dat |>
@@ -71,7 +78,7 @@ library(janitor)
 votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1077921709&single=true&output=csv"   
 
 # --- READ ---
-dat <- readr::read_csv(votes_csv, show_col_types = FALSE) |>
+dat <- readr::read_csv(votes_csv, show_col_types = FALSE, encoding = "UTF-8")) |>
   janitor::clean_names()
 
 # --- OPTIONAL transforms ---
