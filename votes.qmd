@@ -7,8 +7,9 @@ execute:
   warning: false
   error: true  
 ---
+::: {.panel-tabset}
 
-testing vote table
+## Committee A
 
 ```{r}
 
@@ -52,4 +53,46 @@ dat |>
 
 ```
 
+## Committee B
 
+```{r}
+
+# --- Packages ---
+# (Best practice: install these ahead of time; installing while rendering can fail in CI.)
+for (pkg in c("readr","dplyr","gt","janitor")) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+}
+library(readr)
+library(dplyr)
+library(gt)
+library(janitor)
+
+# --- CONFIG: your published CSV link ---
+votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1077921709&single=true&output=csv"   
+
+# --- READ ---
+dat <- readr::read_csv(votes_csv, show_col_types = FALSE) |>
+  janitor::clean_names()
+
+# --- OPTIONAL transforms ---
+# dat <- dat |> mutate(vote_share = scales::percent(vote_share))
+
+# --- RENDER with gt ---
+dat |>
+  gt() |>
+  tab_header(
+    title = md("**Votes**"),
+    subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
+  ) |>
+  # fmt_missing is available in recent gt; if on older gt, comment this out:
+  fmt_missing(columns = everything(), missing_text = "—") |>
+  # Avoid opt_table_font(stack=TRUE) for broader compatibility:
+  # opt_table_font() |>
+  tab_options(
+    table.width = pct(100),
+    table.font.size = px(14)
+  ) |>
+  opt_row_striping() |>
+  tab_source_note(md("Source: Google Sheet (published CSV)"))
+
+```
