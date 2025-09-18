@@ -5,3 +5,9 @@ title: "Welcome to the 2025 UC Merced California Legislative Simulation Tracker"
 This website is your one-stop-shop for all documents and activity in the simulation. 
 
 Votes are updated approximately hourly.
+
+
+
+<div style="text-align: center;">
+  <img src="files/images/homepage_logo.png"  style="width: 80%; max-width: 800px;">
+</div>
