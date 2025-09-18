@@ -1,5 +1,5 @@
 ---
-title: "oreos"
+title: "Limiting AI usage in state agencies"
 ---
 
-[View the PDF](../bills/bill_4.pdf)
+[View the PDF](../files/pdfs/bills/bill_4.pdf)

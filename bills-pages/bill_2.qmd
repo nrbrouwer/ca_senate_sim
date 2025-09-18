@@ -1,5 +1,5 @@
 ---
-title: "sprite"
+title: "Expanding mail-in voting time"
 ---
 
-[View the PDF](../bills/bill_2.pdf)
+[View the PDF](../files/pdfs/bills/bill_2.pdf)

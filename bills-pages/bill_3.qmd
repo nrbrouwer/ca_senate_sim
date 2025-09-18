@@ -1,5 +1,5 @@
 ---
-title: "this is a really long title to test how the table will hold a really long title and make sure it doesn't look ugly this is a really looooooooooooooooooooooooooooooooooong title"
+title: "Speeding up review times for housing projects"
 ---
 
-[View the PDF](../bills/bill_3.pdf)
+[View the PDF](../files/pdfs/bills/bill_3.pdf)
