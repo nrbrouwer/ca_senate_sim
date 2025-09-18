@@ -27,8 +27,12 @@ library(janitor)
 votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=0&single=true&output=csv"   
 
 # --- READ ---
-dat <- readr::read_csv(votes_csv, show_col_types = FALSE, encoding = "UTF-8") |>
+dat <- readr::read.csv(votes_csv, show_col_types = FALSE, encoding = "UTF-8") |>
   janitor::clean_names()
+
+senators <- read.csv("files/csvs/senator_list.csv")
+d_sen <- senators$Name[senators$Party == "D"]
+r_sen <- senators$Name[senators$Party == "R"]
 
 # --- Transformation ---
 dat <- dat %>%
@@ -78,7 +82,7 @@ library(janitor)
 votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1077921709&single=true&output=csv"   
 
 # --- READ ---
-dat <- readr::read_csv(votes_csv, show_col_types = FALSE, encoding = "UTF-8")) |>
+dat <- readr::read.csv(votes_csv, show_col_types = FALSE, encoding = "UTF-8")) |>
   janitor::clean_names()
 
 # --- OPTIONAL transforms ---
