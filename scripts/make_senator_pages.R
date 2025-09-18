@@ -1,7 +1,7 @@
 # scripts/make_senator_pages.R
 
 senator_csv <- "files/csvs/senator_list.csv"
-senator_dir  <- "files/pdfs/role profiles"
+senator_dir  <- "files/pdfs/role_profiles"
 pages_dir  <- "senator-pages"
 
 if (!dir.exists(pages_dir)) dir.create(pages_dir, recursive = TRUE)

@@ -7,13 +7,12 @@ execute:
 
 
 ```{r}
-library(readxl)
 library(gt)
 
 # read the first sheet of your Excel file
-bills <- read_excel("bill_list.xlsx")
+bills <- read.csv("files/csvs/bill_list.csv")
 
-bills$PDF <- paste0("[View Bill](Bills/bill_", bills$bill_number, ".pdf)")
+bills$PDF <- paste0("[View Bill](files/pdfs/bills/bill_", bills$bill_number, ".pdf)")
 
 bills$Page <- paste0("[Page](bills-pages/bill_", bills$bill_number, ".html)")
 

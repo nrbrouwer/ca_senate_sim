@@ -5,4 +5,22 @@ execute:
   echo: false
 ---
 
-this is where information on senators will go
+```{r}
+library(gt)
+
+# read the first sheet of your Excel file
+senators <- read.csv("files/csvs/senator_list.csv")
+
+senators$Profile <- paste0("[View Profile](files/pdfs/role profiles/district_", senators$District, "_profile.pdf)")
+
+senators$Page <- paste0("[Page](senator-pages/district_", senators$District, ".html)")
+
+# simple nice table with kableExtra
+senators %>%
+  gt() %>%
+  fmt_markdown(columns = c("PDF", "Page")) %>%
+  tab_header(
+    title = "Senators",
+    subtitle = "Click to view senator profile or activity"
+  )
+```
