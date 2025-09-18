@@ -14,7 +14,7 @@ for (i in seq_len(nrow(senator_list))) {
   name   <- as.character(senator_list$Name[i])
   
   qmd_path <- file.path(pages_dir, paste0("district_", senator_id, ".qmd"))
-  pdf_rel  <- file.path("..", senator_dir, paste0("district_", senator_id, "profile.pdf"))
+  pdf_rel  <- file.path("..", senator_dir, paste0("district_", senator_id, "_profile.pdf"))
   
   yaml <- c(
     "---",

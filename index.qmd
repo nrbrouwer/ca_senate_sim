@@ -1,5 +1,7 @@
 ---
-title: "ca_senate_sim"
+title: "Welcome to the 2025 UC Merced California Legislative Simulation Tracker"
 ---
 
-This is a test page. 
+This website is your one-stop-shop for all documents and activity in the simulation. 
+
+Votes are updated approximately hourly.
