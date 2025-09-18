@@ -1,16 +1,13 @@
 # scripts/make_bill_pages.R
 
-# Load libraries
-library(readxl)
-
-bills_xlsx <- "bill_list.xlsx"
-bills_dir  <- "bills"
+bills_xlsx <- "files/csvs/bill_list.csv"
+bills_dir  <- "files/pdfs/bills"
 pages_dir  <- "bills-pages"
 
 if (!dir.exists(pages_dir)) dir.create(pages_dir, recursive = TRUE)
 
 # Read your spreadsheet
-bill_list <- read_excel(bills_xlsx) 
+bill_list <- read.csv(bills_xlsx) 
 
 for (i in seq_len(nrow(bill_list))) {
   bill_id <- as.character(bill_list$bill_number[i])
