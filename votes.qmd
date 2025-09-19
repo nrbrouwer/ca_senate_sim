@@ -27,7 +27,7 @@ library(janitor)
 votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=0&single=true&output=csv"   
 
 # --- READ ---
-dat <- readr::read.csv(votes_csv, show_col_types = FALSE, encoding = "UTF-8") |>
+dat <- read.csv(votes_csv, encoding = "UTF-8") |>
   janitor::clean_names()
 
 senators <- read.csv("files/csvs/senator_list.csv")
@@ -39,7 +39,16 @@ dat <- dat %>%
   mutate(yes = sum(c_across(2:5) == 1, na.rm = TRUE), #change rows depending on number of senators
         no = sum(c_across(2:5) == 0, na.rm = TRUE),
         absent = sum(c_across(2:5) == "", na.rm = TRUE),
-        Vote = paste(yes, no, absent, sep = "—")) %>%
+        Vote = paste(yes, no, absent, sep = "—"),
+        d_yes = sum(c_across(any_of(d_sen)) == 1, na.rm = TRUE),
+        d_no = sum(c_across(any_of(d_sen)) == 0, na.rm = TRUE),
+        d_absent = sum(c_across(any_of(d_sen)) == "", na.rm = TRUE),
+        Dem_vote = paste(d_yes, d_no, d_absent, sep = "—"),
+        d_yes = sum(c_across(any_of(d_sen)) == 1, na.rm = TRUE),
+        d_no = sum(c_across(any_of(d_sen)) == 0, na.rm = TRUE),
+        d_absent = sum(c_across(any_of(d_sen)) == "", na.rm = TRUE),
+        Dem_vote = paste(d_yes, d_no, d_absent, sep = "—"),
+        ) %>%
   select(Bill, Vote, Result) 
 
 
@@ -82,7 +91,7 @@ library(janitor)
 votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1077921709&single=true&output=csv"   
 
 # --- READ ---
-dat <- readr::read.csv(votes_csv, show_col_types = FALSE, encoding = "UTF-8")) |>
+dat <- read.csv(votes_csv, encoding = "UTF-8")) |>
   janitor::clean_names()
 
 # --- OPTIONAL transforms ---
