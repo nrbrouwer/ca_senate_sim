@@ -55,7 +55,7 @@ dat <- dat %>%
         Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Bill, title, author, Vote, Result, Dem_percent, Rep_percent) 
+  select(date, Bill, title, author, Vote, Result, Dem_percent, Rep_percent) 
 
 
 
@@ -119,7 +119,7 @@ dat <- dat %>%
         Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Bill, title, author, Vote, Result, Dem_percent, Rep_percent) 
+  select(date, Bill, title, author, Vote, Result, Dem_percent, Rep_percent) 
 
 # --- RENDER with gt ---
 dat |>
