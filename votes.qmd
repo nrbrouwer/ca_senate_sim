@@ -27,29 +27,35 @@ library(janitor)
 votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=0&single=true&output=csv"   
 
 # --- READ ---
-dat <- read.csv(votes_csv, encoding = "UTF-8") |>
-  janitor::clean_names()
+dat <- read.csv(votes_csv) %>%
+  rename_with(~ gsub("\\.", " ", .x))
 
 senators <- read.csv("files/csvs/senator_list.csv")
 d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
 
+bills <- read.csv("files/csvs/bill_list.csv")
+
 # --- Transformation ---
 dat <- dat %>%
-  mutate(yes = sum(c_across(2:5) == 1, na.rm = TRUE), #change rows depending on number of senators
-        no = sum(c_across(2:5) == 0, na.rm = TRUE),
-        absent = sum(c_across(2:5) == "", na.rm = TRUE),
+  rowwise() %>%
+  mutate(yes = sum(c_across(any_of(s_names)) == 1, na.rm = TRUE),
+        no = sum(c_across(any_of(s_names)) == 0, na.rm = TRUE),
+        absent = sum(is.na(c_across(any_of(s_names)))),
         Vote = paste(yes, no, absent, sep = "—"),
         d_yes = sum(c_across(any_of(d_sen)) == 1, na.rm = TRUE),
         d_no = sum(c_across(any_of(d_sen)) == 0, na.rm = TRUE),
-        d_absent = sum(c_across(any_of(d_sen)) == "", na.rm = TRUE),
+        d_absent = sum(is.na(c_across(any_of(d_sen)))),
         Dem_vote = paste(d_yes, d_no, d_absent, sep = "—"),
-        d_yes = sum(c_across(any_of(d_sen)) == 1, na.rm = TRUE),
-        d_no = sum(c_across(any_of(d_sen)) == 0, na.rm = TRUE),
-        d_absent = sum(c_across(any_of(d_sen)) == "", na.rm = TRUE),
-        Dem_vote = paste(d_yes, d_no, d_absent, sep = "—"),
+        Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
+        r_yes = sum(c_across(any_of(r_sen)) == 1, na.rm = TRUE),
+        r_no = sum(c_across(any_of(r_sen)) == 0, na.rm = TRUE),
+        r_absent = sum(is.na(c_across(any_of(r_sen)))),
+        Rep_vote = paste(r_yes, r_no, r_absent, sep = "—"),
+        Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
         ) %>%
-  select(Bill, Vote, Result) 
+  left_join(bills, by = c("Bill" = "bill_number")) %>%
+  select(Bill, title, author, Vote, Result, Dem_percent, Rep_percent) 
 
 
 
@@ -91,11 +97,29 @@ library(janitor)
 votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1077921709&single=true&output=csv"   
 
 # --- READ ---
-dat <- read.csv(votes_csv, encoding = "UTF-8")) |>
-  janitor::clean_names()
+dat <- read.csv(votes_csv) %>%
+  rename_with(~ gsub("\\.", " ", .x))
 
-# --- OPTIONAL transforms ---
-# dat <- dat |> mutate(vote_share = scales::percent(vote_share))
+# --- Transformation ---
+dat <- dat %>%
+  rowwise() %>%
+  mutate(yes = sum(c_across(any_of(s_names)) == 1, na.rm = TRUE),
+        no = sum(c_across(any_of(s_names)) == 0, na.rm = TRUE),
+        absent = sum(is.na(c_across(any_of(s_names)))),
+        Vote = paste(yes, no, absent, sep = "—"),
+        d_yes = sum(c_across(any_of(d_sen)) == 1, na.rm = TRUE),
+        d_no = sum(c_across(any_of(d_sen)) == 0, na.rm = TRUE),
+        d_absent = sum(is.na(c_across(any_of(d_sen)))),
+        Dem_vote = paste(d_yes, d_no, d_absent, sep = "—"),
+        Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
+        r_yes = sum(c_across(any_of(r_sen)) == 1, na.rm = TRUE),
+        r_no = sum(c_across(any_of(r_sen)) == 0, na.rm = TRUE),
+        r_absent = sum(is.na(c_across(any_of(r_sen)))),
+        Rep_vote = paste(r_yes, r_no, r_absent, sep = "—"),
+        Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
+        ) %>%
+  left_join(bills, by = c("Bill" = "bill_number")) %>%
+  select(Bill, title, author, Vote, Result, Dem_percent, Rep_percent) 
 
 # --- RENDER with gt ---
 dat |>
