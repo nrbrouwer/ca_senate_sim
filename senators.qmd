@@ -41,7 +41,7 @@ if (profile_folder_has_files) {
 # Create the table
 senators %>%
   gt() %>%
-  cols_hide(columns = c("namematch", "First.Name", "Last.Name")) %>%
+  cols_hide(columns = c("namesmatch", "First.Name", "Last.Name")) %>%
   cols_label(
     District = "District Number",
     Name_Link = "Name",
