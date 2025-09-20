@@ -15,14 +15,15 @@ library(dplyr)
 senators <- read.csv("files/csvs/senator_list.csv")
 senators <- senators %>%
   mutate(namesmatch = gsub(" ", "", Last.Name),
-        namesmatch = tolower(namesmatch))
+        namesmatch = tolower(namesmatch),
+        name = paste(Last.Name, First.Name, sep = ","))
 
 # Check if the role_profiles folder exists and has any files
 profile_folder_has_files <- dir.exists("files/pdfs/role_profiles/senators") && 
                            length(list.files("files/pdfs/role_profiles/senators")) > 0
 
-# Always add the Page column
-senators$Page <- paste0("[Page](senator-pages/district_", senators$District, ".html)")
+# Adding name column which links to specific senator page
+senators$Name_Link <- paste0("[", senators$Name, "](senator-pages/district_", senators$District, ".html)")
 
 # Only add Profile column if the folder has files
 if (profile_folder_has_files) {
@@ -30,17 +31,32 @@ if (profile_folder_has_files) {
 }
 
 # Build the fmt_markdown columns list dynamically
-markdown_columns <- c("Page")  # Page is always there
+markdown_columns <- c("Name_Link") 
 if (profile_folder_has_files) {
   markdown_columns <- c(markdown_columns, "Profile")
 }
 
+
+
 # Create the table
 senators %>%
   gt() %>%
+  cols_hide(columns = c("namematch", "First.Name", "Last.Name")) %>%
+  cols_label(
+    District = "District Number"
+    Name_Link = "Name"
+    Party = "Party"
+  ) %>%
   fmt_markdown(columns = all_of(markdown_columns)) %>%
   tab_header(
     title = "Senators",
     subtitle = "Click to view senator profile or activity"
+  )%>%
+  opt_interactive(
+    use_sorting = TRUE,
+    use_search = TRUE,
+    use_filters = FALSE,
+    use_resizers = TRUE,
+    use_highlight = TRUE
   )
 ```
