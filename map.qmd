@@ -40,6 +40,7 @@ leaflet(districts) %>%
     color = "#5145ff",
     dashArray = "3",
     fillOpacity = 0.4,
+    layerId = ~district,  # Add this line to ensure proper layer identification
     highlight = highlightOptions(
       weight = 3,
       color = "#f3df2f",
@@ -55,25 +56,34 @@ leaflet(districts) %>%
     )
  ) %>%
   htmlwidgets::onRender("
-    function(el, x) {
+    function(el, x, data) {
+      // Store the district data for reference
+      var districtData = HTMLWidgets.dataframeToD3(data.x.calls[0].args[0]);
+      
       // Add click event to all polygons
       this.eachLayer(function(layer) {
-        if (layer.feature) {
+        if (layer.feature && layer.feature.properties) {
           layer.on('click', function(e) {
-            // Get the feature properties
-            var properties = e.target.feature.properties;
+            var district = e.target.feature.properties.district;
             
-            // Create URL - adjust this based on your naming convention
-            var url = properties.Name_Link + '.html';  // 
+            // Find matching district data
+            var matchedDistrict = districtData.find(function(d) {
+              return d.district == district;
+            });
             
-            // Navigate to the page
-            window.open(url, '_blank');  // Opens in new tab
-            // Use this instead if you want same tab: window.location.href = url;
+            if (matchedDistrict && matchedDistrict.Name_Link) {
+              var url = matchedDistrict.Name_Link + '.html';
+              window.open(url, '_blank');
+            } else {
+              // Fallback URL construction
+              var url = '/senator-pages/district_' + district + '.html';
+              window.open(url, '_blank');
+            }
           });
         }
       });
     }
   ") %>%
-  setView(lng = -120, lat = 36.5, zoom = 4.3) 
+  setView(lng = -120, lat = 36.5, zoom = 7) 
 ```
 
