@@ -43,8 +43,8 @@ senators %>%
   gt() %>%
   cols_hide(columns = c("namematch", "First.Name", "Last.Name")) %>%
   cols_label(
-    District = "District Number"
-    Name_Link = "Name"
+    District = "District Number",
+    Name_Link = "Name",
     Party = "Party"
   ) %>%
   fmt_markdown(columns = all_of(markdown_columns)) %>%
