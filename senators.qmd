@@ -13,17 +13,20 @@ library(dplyr)
 
 # Read the CSV file
 senators <- read.csv("files/csvs/senator_list.csv")
+senators$namematch <- senators %>%
+  mutate(namesmatch = gsub(" ", "", Last.Name),
+        namesmatch = tolower(namesmatch))
 
 # Check if the role_profiles folder exists and has any files
-profile_folder_has_files <- dir.exists("files/pdfs/role_profiles") && 
-                           length(list.files("files/pdfs/role_profiles")) > 0
+profile_folder_has_files <- dir.exists("files/pdfs/role_profiles/senators") && 
+                           length(list.files("files/pdfs/role_profiles/senators")) > 0
 
 # Always add the Page column
 senators$Page <- paste0("[Page](senator-pages/district_", senators$District, ".html)")
 
 # Only add Profile column if the folder has files
 if (profile_folder_has_files) {
-  senators$Profile <- paste0("[View Profile](files/pdfs/role_profiles/district_",       senators$District, "_profile.pdf)")
+  senators$Profile <- paste0("[View Profile](files/pdfs/role_profiles/senators/", senators$namesmatch, "_",  senators$District, "_profile.pdf)")
 }
 
 # Build the fmt_markdown columns list dynamically
