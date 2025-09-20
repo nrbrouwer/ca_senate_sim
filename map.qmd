@@ -16,6 +16,7 @@ execute:
 library(leaflet)
 library(sf)
 library(htmlwidgets)
+library(tidyverse)
 
 # Read the GeoJSON data
 districts <- st_read("files/other/ca_senate_districts.geojson")
