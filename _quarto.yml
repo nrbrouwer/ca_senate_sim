@@ -3,6 +3,10 @@ project:
   pre-render:
     - Rscript scripts/make_bill_pages.R
     - Rscript scripts/make_senator_pages.R
+  
+
+resources:
+  - "files/"
 
 website:
   title: "UC Merced CA Legislative Simulation -- 2025"
