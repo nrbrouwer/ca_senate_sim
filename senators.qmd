@@ -13,7 +13,7 @@ library(dplyr)
 
 # Read the CSV file
 senators <- read.csv("files/csvs/senator_list.csv")
-senators$namematch <- senators %>%
+senators <- senators %>%
   mutate(namesmatch = gsub(" ", "", Last.Name),
         namesmatch = tolower(namesmatch))
 
