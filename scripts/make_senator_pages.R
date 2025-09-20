@@ -11,7 +11,7 @@ senator_list <- read.csv(senator_csv)
 
 for (i in seq_len(nrow(senator_list))) {
   senator_id <- as.character(senator_list$District[i])
-  name   <- paste(senator_list$First.Name, senator_list$Last.Name, sep = " ")
+  name   <- paste(senator_list$First.Name[i], senator_list$Last.Name[i], sep = " ")
   
   qmd_path <- file.path(pages_dir, paste0("district_", senator_id, ".qmd"))
   pdf_rel  <- file.path("..", senator_dir, paste0("district_", senator_id, "_profile.pdf"))
