@@ -20,6 +20,8 @@ website:
         href: senators.qmd
       - text: Votes
         href: votes.qmd
+      - text: Districts
+        href: map.qmd
 
 format:
   html:

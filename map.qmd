@@ -1,0 +1,78 @@
+---
+title: "District Map"
+format: 
+  html:
+    page-layout: full
+    resources:
+      - "files/other/ca_senate_districts.geojson"
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+
+library(leaflet)
+library(sf)
+library(htmlwidgets)
+
+# Read the GeoJSON data
+districts <- st_read("files/other/ca_senate_districts.geojson")
+
+senators <- read.csv("files/csvs/senator_list.csv")
+senators <- senators %>%
+  mutate(namesmatch = gsub(" ", "", Last.Name),
+        namesmatch = tolower(namesmatch),
+        name = paste(Last.Name, First.Name, sep = ", "))
+
+senators$Name_Link <- paste0("/senator-pages/district_", senators$District)
+
+districts <- left_join(districts, senators, by = c("district" = "District"))
+
+# Create map
+leaflet(districts) %>%
+  addTiles() %>%  # Add base map
+  addPolygons(
+    weight = 1,
+    opacity = 1,
+    color = "#5145ff",
+    dashArray = "3",
+    fillOpacity = 0.4,
+    highlight = highlightOptions(
+      weight = 3,
+      color = "#f3df2f",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE
+    ),
+    label = ~paste("District", district),  
+    labelOptions = labelOptions(
+      style = list("font-weight" = "normal", padding = "3px 8px"),
+      textsize = "13px",
+      direction = "auto"
+    )
+ ) %>%
+  htmlwidgets::onRender("
+    function(el, x) {
+      // Add click event to all polygons
+      this.eachLayer(function(layer) {
+        if (layer.feature) {
+          layer.on('click', function(e) {
+            // Get the feature properties
+            var properties = e.target.feature.properties;
+            
+            // Create URL - adjust this based on your naming convention
+            var url = properties.Name_Link + '.html';  // 
+            
+            // Navigate to the page
+            window.open(url, '_blank');  // Opens in new tab
+            // Use this instead if you want same tab: window.location.href = url;
+          });
+        }
+      });
+    }
+  ") %>%
+  setView(lng = -120, lat = 36.5, zoom = 4.3) 
+```
+
