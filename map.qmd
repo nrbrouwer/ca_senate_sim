@@ -21,29 +21,19 @@ library(tidyverse)
 # Read the GeoJSON data
 districts <- suppressMessages(st_read("files/other/ca_senate_districts.geojson"))
 
-senators <- suppressMessages(read.csv("files/csvs/senator_list.csv"))
-senators <- senators %>%
-  mutate(namesmatch = gsub(" ", "", Last.Name),
-        namesmatch = tolower(namesmatch),
-        name = paste(Last.Name, First.Name, sep = ", "))
-
-senators$Name_Link <- paste0("/senator-pages/district_", senators$District)
-
-districts <- left_join(districts, senators, by = c("district" = "District"))
-
 # Create map with JavaScript embedded differently
 map <- leaflet(districts) %>%
-  addTiles() %>%  # Add base map
+  addProviderTiles(providers$CartoDB.Positron) %>%  
   addPolygons(
     weight = 1,
     opacity = 1,
-    color = "#5145ff",
+    color = "#17345a",
     dashArray = "3",
-    fillOpacity = 0.4,
+    fillOpacity = 0.6,
     layerId = ~district,
     highlight = highlightOptions(
       weight = 3,
-      color = "#f3df2f",
+      color = "#d4a821",
       dashArray = "",
       fillOpacity = 0.7,
       bringToFront = TRUE
@@ -76,8 +66,8 @@ map %>%
         
         if (clickedLayer && clickedLayer.options && clickedLayer.options.layerId) {
           var district = clickedLayer.options.layerId;
-          console.log('Clicked on district:', district);
-          var url = '/senator-pages/district_' + district + '.html';
+          console.log('District:', district);
+          var url = 'ca_senate_sim/senator-pages/district_' + district + '.html';
           console.log('Opening:', url);
           window.open(url, '_blank');
         }
