@@ -45,7 +45,7 @@ map <- leaflet(districts) %>%
       fillOpacity = 0.7,
       bringToFront = TRUE
     ),
-    label = ~paste("District", district, ":", name),  
+    label = ~paste("District", district, name),  
     labelOptions = labelOptions(
       style = list("font-weight" = "normal", padding = "3px 8px"),
       textsize = "13px",
