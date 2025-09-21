@@ -19,7 +19,7 @@ library(htmlwidgets)
 library(tidyverse)
 
 # Read the GeoJSON data
-districts <- suppressMessages(st_read("files/other/ca_senate_districts.geojson"))
+districts <- suppressMessages(st_read("files/other/ca_senate_districts.geojson", quiet = TRUE))
 
 # Create map with JavaScript embedded differently
 map <- leaflet(districts) %>%
@@ -28,11 +28,10 @@ map <- leaflet(districts) %>%
     weight = 1,
     opacity = 1,
     color = "#17345a",
-    dashArray = "3",
     fillOpacity = 0.6,
     layerId = ~district,
     highlight = highlightOptions(
-      weight = 3,
+      weight = 4,
       color = "#d4a821",
       dashArray = "",
       fillOpacity = 0.7,
@@ -67,7 +66,7 @@ map %>%
         if (clickedLayer && clickedLayer.options && clickedLayer.options.layerId) {
           var district = clickedLayer.options.layerId;
           console.log('District:', district);
-          var url = 'ca_senate_sim/senator-pages/district_' + district + '.html';
+          var url = '/senator-pages/district_' + district + '.html';
           console.log('Opening:', url);
           window.open(url, '_blank');
         }
