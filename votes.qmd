@@ -31,6 +31,7 @@ dat <- read.csv(votes_csv) %>%
   rename_with(~ gsub("\\.", " ", .x))
 
 senators <- read.csv("files/csvs/senator_list.csv")
+senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
 s_names <- senators$Name
 d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
