@@ -19,9 +19,9 @@ library(htmlwidgets)
 library(tidyverse)
 
 # Read the GeoJSON data
-districts <- st_read("files/other/ca_senate_districts.geojson")
+districts <- suppressMessages(st_read("files/other/ca_senate_districts.geojson"))
 
-senators <- read.csv("files/csvs/senator_list.csv")
+senators <- suppressMessages(read.csv("files/csvs/senator_list.csv"))
 senators <- senators %>%
   mutate(namesmatch = gsub(" ", "", Last.Name),
         namesmatch = tolower(namesmatch),
@@ -56,34 +56,37 @@ leaflet(districts) %>%
     )
  ) %>%
   htmlwidgets::onRender("
-    function(el, x, data) {
-      // Store the district data for reference
-      var districtData = HTMLWidgets.dataframeToD3(data.x.calls[0].args[0]);
+    function(el, x) {
+      console.log('Map initialized, adding click events...');
       
       // Add click event to all polygons
       this.eachLayer(function(layer) {
+        console.log('Processing layer:', layer);
+        
         if (layer.feature && layer.feature.properties) {
+          console.log('Layer has feature with properties:', layer.feature.properties);
+          
           layer.on('click', function(e) {
+            console.log('Click event fired!');
+            console.log('Clicked feature properties:', e.target.feature.properties);
+            
+            // Get the district number from the feature properties
             var district = e.target.feature.properties.district;
+            console.log('District:', district);
             
-            // Find matching district data
-            var matchedDistrict = districtData.find(function(d) {
-              return d.district == district;
-            });
+            // Construct URL directly from district number
+            var url = '/senator-pages/district_' + district + '.html';
+            console.log('Attempting to open URL:', url);
             
-            if (matchedDistrict && matchedDistrict.Name_Link) {
-              var url = matchedDistrict.Name_Link + '.html';
-              window.open(url, '_blank');
-            } else {
-              // Fallback URL construction
-              var url = '/senator-pages/district_' + district + '.html';
-              window.open(url, '_blank');
-            }
+            // Navigate to the page
+            window.open(url, '_blank');
           });
+        } else {
+          console.log('Layer without feature/properties:', layer);
         }
       });
     }
   ") %>%
-  setView(lng = -120, lat = 36.5, zoom = 7) 
+  setView(lng = -120, lat = 36.5, zoom = 5) 
 ```
 
