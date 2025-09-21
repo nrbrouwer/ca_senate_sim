@@ -32,6 +32,7 @@ dat <- read.csv(votes_csv) %>%
 
 senators <- read.csv("files/csvs/senator_list.csv")
 senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
+senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
 s_names <- senators$Name
 d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
@@ -99,6 +100,15 @@ votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VF
 # --- READ ---
 dat <- read.csv(votes_csv) %>%
   rename_with(~ gsub("\\.", " ", .x))
+
+senators <- read.csv("files/csvs/senator_list.csv")
+senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
+senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
+s_names <- senators$Name
+d_sen <- senators$Name[senators$Party == "D"]
+r_sen <- senators$Name[senators$Party == "R"]
+
+bills <- read.csv("files/csvs/bill_list.csv")
 
 # --- Transformation ---
 dat <- dat %>%
