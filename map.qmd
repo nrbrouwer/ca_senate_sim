@@ -31,8 +31,8 @@ senators$Name_Link <- paste0("/senator-pages/district_", senators$District)
 
 districts <- left_join(districts, senators, by = c("district" = "District"))
 
-# Create map
-leaflet(districts) %>%
+# Create map with JavaScript embedded differently
+map <- leaflet(districts) %>%
   addTiles() %>%  # Add base map
   addPolygons(
     weight = 1,
@@ -40,7 +40,7 @@ leaflet(districts) %>%
     color = "#5145ff",
     dashArray = "3",
     fillOpacity = 0.4,
-    layerId = ~district,  # Important: this creates unique IDs
+    layerId = ~district,
     highlight = highlightOptions(
       weight = 3,
       color = "#f3df2f",
@@ -48,14 +48,41 @@ leaflet(districts) %>%
       fillOpacity = 0.7,
       bringToFront = TRUE
     ),
-    label = ~paste("District", district),  
+    label = ~paste("Click for District", district),  
     labelOptions = labelOptions(
       style = list("font-weight" = "normal", padding = "3px 8px"),
       textsize = "13px",
       direction = "auto"
-    ),
-    popup = ~paste0("<div onclick=\"window.open('/senator-pages/district_", district, ".html', '_blank')\">Click to view District ", district, "</div>")
- ) %>%
-  setView(lng = -120, lat = 36.5, zoom = 5) 
+    )
+  ) %>%
+  setView(lng = -120, lat = 36.5, zoom = 5)
+
+# Add the JavaScript after map creation
+map %>% 
+  onRender("
+    function(el, x) {
+      var myMap = this;
+      
+      myMap.on('click', function(e) {
+        console.log('Map clicked at:', e.latlng);
+        
+        // Check if we clicked on a layer
+        var clickedLayer = null;
+        myMap.eachLayer(function(layer) {
+          if (layer.getBounds && layer.getBounds().contains(e.latlng)) {
+            clickedLayer = layer;
+          }
+        });
+        
+        if (clickedLayer && clickedLayer.options && clickedLayer.options.layerId) {
+          var district = clickedLayer.options.layerId;
+          console.log('Clicked on district:', district);
+          var url = '/senator-pages/district_' + district + '.html';
+          console.log('Opening:', url);
+          window.open(url, '_blank');
+        }
+      });
+    }
+  ")
 ```
 
