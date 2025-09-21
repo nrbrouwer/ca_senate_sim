@@ -23,6 +23,11 @@ library(tidyverse)
 # Read the GeoJSON data
 districts <- st_read("files/other/ca_senate_districts.geojson", quiet = TRUE)
 
+senators <- read.csv("files/csvs/senator_list.csv")
+senators <- senators %>%
+  mutate(name = paste(Last.Name, First.Name, sep = ", "))
+
+districts <- left_join(districts, senators, by = c("district" = "District"))
 # Create map 
 map <- leaflet(districts) %>%
   addProviderTiles(providers$CartoDB.Positron) %>%  
@@ -40,7 +45,7 @@ map <- leaflet(districts) %>%
       fillOpacity = 0.7,
       bringToFront = TRUE
     ),
-    label = ~paste("District", district),  
+    label = ~paste("District", district, ":", name),  
     labelOptions = labelOptions(
       style = list("font-weight" = "normal", padding = "3px 8px"),
       textsize = "13px",
@@ -69,7 +74,7 @@ map %>%
         if (clickedLayer && clickedLayer.options && clickedLayer.options.layerId) {
           var district = clickedLayer.options.layerId;
           console.log('District:', district);
-          var url = '/senator-pages/district_' + district + '.html';
+          var url = '/ca_senate_sim/senator-pages/district_' + district + '.html';
           console.log('Opening:', url);
           window.open(url, '_blank');
         }
