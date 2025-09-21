@@ -40,7 +40,7 @@ leaflet(districts) %>%
     color = "#5145ff",
     dashArray = "3",
     fillOpacity = 0.4,
-    layerId = ~district,  # Add this line to ensure proper layer identification
+    layerId = ~district,  # Important: this creates unique IDs
     highlight = highlightOptions(
       weight = 3,
       color = "#f3df2f",
@@ -53,40 +53,9 @@ leaflet(districts) %>%
       style = list("font-weight" = "normal", padding = "3px 8px"),
       textsize = "13px",
       direction = "auto"
-    )
+    ),
+    popup = ~paste0("<div onclick=\"window.open('/senator-pages/district_", district, ".html', '_blank')\">Click to view District ", district, "</div>")
  ) %>%
-  htmlwidgets::onRender("
-    function(el, x) {
-      console.log('Map initialized, adding click events...');
-      
-      // Add click event to all polygons
-      this.eachLayer(function(layer) {
-        console.log('Processing layer:', layer);
-        
-        if (layer.feature && layer.feature.properties) {
-          console.log('Layer has feature with properties:', layer.feature.properties);
-          
-          layer.on('click', function(e) {
-            console.log('Click event fired!');
-            console.log('Clicked feature properties:', e.target.feature.properties);
-            
-            // Get the district number from the feature properties
-            var district = e.target.feature.properties.district;
-            console.log('District:', district);
-            
-            // Construct URL directly from district number
-            var url = '/senator-pages/district_' + district + '.html';
-            console.log('Attempting to open URL:', url);
-            
-            // Navigate to the page
-            window.open(url, '_blank');
-          });
-        } else {
-          console.log('Layer without feature/properties:', layer);
-        }
-      });
-    }
-  ") %>%
   setView(lng = -120, lat = 36.5, zoom = 5) 
 ```
 
