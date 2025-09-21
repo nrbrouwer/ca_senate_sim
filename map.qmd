@@ -48,32 +48,5 @@ map <- leaflet(districts) %>%
   ) %>%
   setView(lng = -120, lat = 36.5, zoom = 5)
 
-# Add the JavaScript after map creation
-map %>% 
-  onRender("
-    function(el, x) {
-      var myMap = this;
-      
-      myMap.on('click', function(e) {
-        console.log('Map clicked at:', e.latlng);
-        
-        // Check if we clicked on a layer
-        var clickedLayer = null;
-        myMap.eachLayer(function(layer) {
-          if (layer.getBounds && layer.getBounds().contains(e.latlng)) {
-            clickedLayer = layer;
-          }
-        });
-        
-        if (clickedLayer && clickedLayer.options && clickedLayer.options.layerId) {
-          var district = clickedLayer.options.layerId;
-          console.log('District:', district);
-          var url = '/senator-pages/district_' + district + '.html';
-          console.log('Opening:', url);
-          window.open(url, '_blank');
-        }
-      });
-    }
-  ")
 ```
 
