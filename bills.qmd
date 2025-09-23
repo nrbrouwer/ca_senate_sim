@@ -10,16 +10,39 @@ execute:
 
 ```{r}
 library(gt)
+library(tidyverse)
+
+
+bills_csv <- "files/csvs/bill_list.csv"
+senator_csv <- "files/csvs/senator_list.csv"
+bills_dir  <- "files/pdfs/bills"
+b_pages_dir  <- "bills-pages"
+s_pages_dir  <- "senator-pages"
 
 # read the first sheet of your Excel file
-bills <- read.csv("files/csvs/bill_list.csv")
+bill_list <- read.csv(bills_csv) 
+senator_list <- read.csv(senator_csv)
 
-bills$PDF <- paste0("[View Bill](files/pdfs/bills/bill_", bills$bill_number, ".pdf)")
+bill_list <- bill_list %>%
+  mutate(name = paste(First.Name, Last.Name, sep = " "),
+        name_join = tolower(paste0(First.Name, Last.Name)),
+        name_join = gsub(" ", "", name_join),
+        bill_measure = paste0("SB-", bill_number),
+        url = paste0(toupper(Last.Name), "_", "SB", bill_number)) 
 
-bills$Page <- paste0("[Page](bills-pages/bill_", bills$bill_number, ".html)")
+senator_list <- senator_list %>%
+  mutate(name_join = tolower(paste0(First.Name, Last.Name)),
+          name_join = gsub(" ", "", name_join))%>%
+  select(-First.Name, -Last.Name )
+
+bill_list <- left_join(bill_list, senator_list, by = "name_join")
+
+bill_list$PDF <- paste0("[View Bill]", bills_dir,  "/", bill_list$url, ".pdf)")
+
+bill_list$Page <- paste0("[Page]", b_pages_dir, "/", bill_list$url, ".html)")
 
 # simple nice table with kableExtra
-bills %>%
+bill_list %>%
   gt() %>%
   fmt_markdown(columns = c("PDF", "Page")) %>%
   tab_header(
