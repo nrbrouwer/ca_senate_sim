@@ -54,7 +54,7 @@ for (i in seq_len(nrow(bill_list))) {
     "",
     sprintf("**Author:** [%s](%s)", author, s_qmd_path),
     "",
-    sprintf("**Committee:**", committee),
+    sprintf("**Committee:** %s", committee),
     "",
     sprintf("**Text:** [View the PDF](%s)", pdf_rel),
     "",

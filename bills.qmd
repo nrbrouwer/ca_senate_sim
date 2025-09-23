@@ -29,7 +29,8 @@ bill_list <- bill_list %>%
         name_join = gsub(" ", "", name_join),
         bill_measure = paste0("SB-", bill_number),
         url = paste0(toupper(Last.Name), "_", "SB", bill_number),
-        committee = ifelse(committee == "" | is.na(committee), "Unassigned", committee)) 
+        committee = ifelse(committee == "" | is.na(committee), "Unassigned", committee),
+        appropriations = ifelse(appropriations == 1, "Yes", "No")) 
 
 senator_list <- senator_list %>%
   mutate(name_join = tolower(paste0(First.Name, Last.Name)),
@@ -38,9 +39,9 @@ senator_list <- senator_list %>%
 
 bill_list <- left_join(bill_list, senator_list, by = "name_join")
 
-bill_list$PDF <- paste0("[View Bill](", bills_dir,  "/", bill_list$url, ".pdf)")
+bill_list$PDF <- paste0("[View Bill Text](", bills_dir,  "/", bill_list$url, ".pdf)")
 
-bill_list$Page <- paste0("[Page](", b_pages_dir, "/", bill_list$url, ".html)")
+bill_list$Page <- paste0("[View Details](", b_pages_dir, "/", bill_list$url, ".html)")
 
 # simple nice table with kableExtra
 bill_list %>%
@@ -53,8 +54,9 @@ bill_list %>%
     name = "Author",
     lobbyist = "Supporting Lobby",
     committee = "Committee",
-    PDF = "PDF",
-    Page = "Bill Page"
+    appropriations = "Appropriations",
+    Page = "Bill Details",
+    PDF = "PDF"
   ) %>%
   tab_header(
     title = "Bills",
