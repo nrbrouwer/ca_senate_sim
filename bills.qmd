@@ -37,13 +37,14 @@ senator_list <- senator_list %>%
 
 bill_list <- left_join(bill_list, senator_list, by = "name_join")
 
-bill_list$PDF <- paste0("[View Bill]", bills_dir,  "/", bill_list$url, ".pdf)")
+bill_list$PDF <- paste0("[View Bill](", bills_dir,  "/", bill_list$url, ".pdf)")
 
-bill_list$Page <- paste0("[Page]", b_pages_dir, "/", bill_list$url, ".html)")
+bill_list$Page <- paste0("[Page](", b_pages_dir, "/", bill_list$url, ".html)")
 
 # simple nice table with kableExtra
 bill_list %>%
-  gt() %>%
+  select(bill_measure, title, name, lobbyist, committee, PDF, Page) %>% 
+  gt() %>% 
   fmt_markdown(columns = c("PDF", "Page")) %>%
   tab_header(
     title = "Bills",

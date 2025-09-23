@@ -37,8 +37,8 @@ for (i in seq_len(nrow(bill_list))) {
   url <- as.character(bill_list$url[i])
   
   b_qmd_path <- file.path(b_pages_dir, paste0(url, ".qmd"))
-  pdf_rel  <- file.path("..", bills_dir, paste0(bill_id, ".pdf"))
-  s_qmd_path <- file.path(s_pages_dir, paste0("district_", district, ".qmd"))
+  pdf_rel  <- file.path("..", bills_dir, paste0(url, ".pdf"))
+  s_qmd_path <- file.path("..", s_pages_dir, paste0("district_", district, ".qmd"))
   
   yaml <- c(
     "---",
