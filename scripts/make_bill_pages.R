@@ -30,7 +30,8 @@ bill_list <- left_join(bill_list, senator_list, by = "name_join")
 
 for (i in seq_len(nrow(bill_list))) {
   bill_id <- as.character(bill_list$bill_measure[i])
-  title   <- as.character(bill_list$title[i])
+  title   <- paste(bill_list$bill_measure[i], bill_list$title[i], sep = " ")
+  committee <- as.character(bill_list$committee[i])
   header <- paste(bill_id, title, sep = ": ")
   author <- paste(bill_list$name[i])
   district <- as.character(bill_list$District[i])
@@ -51,15 +52,15 @@ for (i in seq_len(nrow(bill_list))) {
     "",
     "## Details",
     "",
-    sprintf("**Subject:**", title),
-    "",
     sprintf("**Author:** [%s](%s)", author, s_qmd_path),
+    "",
+    sprintf("**Committee:**", committee),
     "",
     sprintf("**Text:** [View the PDF](%s)", pdf_rel),
     "",
     sprintf('<iframe src="%s" width="100%%" height="600px"></iframe>', pdf_rel),
     "",
-    "## Temp",
+    "## Vote History",
     "",
     "This is temporary content for the second tab. More details about the bill will go here.",
     "",
