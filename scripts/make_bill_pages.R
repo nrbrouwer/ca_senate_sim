@@ -16,7 +16,8 @@ bill_list <- bill_list %>%
   mutate(name = paste(First.Name, Last.Name, sep = " "),
         name_join = tolower(paste0(First.Name, Last.Name)),
         name_join = gsub(" ", "", name_join),
-        bill_number = paste0("SB-", bill_number)) 
+        bill_measure = paste0("SB-", bill_number),
+        url = paste0(toupper(Last.Name), "_", "SB", bill_number)) 
 
 senator_list <- senator_list %>%
   mutate(name_join = tolower(paste0(First.Name, Last.Name)),
@@ -27,13 +28,14 @@ bill_list <- left_join(bill_list, senator_list, by = "name_join")
 
 
 for (i in seq_len(nrow(bill_list))) {
-  bill_id <- as.character(bill_list$bill_number[i])
+  bill_id <- as.character(bill_list$bill_measure[i])
   title   <- as.character(bill_list$title[i])
   header <- paste(bill_id, title, sep = ": ")
-  author <- paste(bill_list$name)
-  district <- as.character(bill_list$District)
+  author <- paste(bill_list$name[i])
+  district <- as.character(bill_list$District[i])
+  url <- as.character(bill_list$url[i])
   
-  b_qmd_path <- file.path(b_pages_dir, paste0(bill_id, ".qmd"))
+  b_qmd_path <- file.path(b_pages_dir, paste0(url, ".qmd"))
   pdf_rel  <- file.path("..", bills_dir, paste0(bill_id, ".pdf"))
   s_qmd_path <- file.path(s_pages_dir, paste0("district_", district, ".qmd"))
   
