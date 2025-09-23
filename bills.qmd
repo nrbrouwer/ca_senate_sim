@@ -28,7 +28,8 @@ bill_list <- bill_list %>%
         name_join = tolower(paste0(First.Name, Last.Name)),
         name_join = gsub(" ", "", name_join),
         bill_measure = paste0("SB-", bill_number),
-        url = paste0(toupper(Last.Name), "_", "SB", bill_number)) 
+        url = paste0(toupper(Last.Name), "_", "SB", bill_number),
+        committee = ifelse(committee == "" | is.na(committee), "Unassigned", committee)) 
 
 senator_list <- senator_list %>%
   mutate(name_join = tolower(paste0(First.Name, Last.Name)),
@@ -46,6 +47,15 @@ bill_list %>%
   select(bill_measure, title, name, lobbyist, committee, PDF, Page) %>% 
   gt() %>% 
   fmt_markdown(columns = c("PDF", "Page")) %>%
+  cols_label(
+    bill_measure = "Bill",
+    title = "Subject",
+    name = "Author",
+    lobbyist = "Supporting Lobby",
+    committee = "Committee",
+    PDF = "PDF",
+    Page = "Bill Page"
+  ) %>%
   tab_header(
     title = "Bills",
     subtitle = "Click a link to open the corresponding PDF"
