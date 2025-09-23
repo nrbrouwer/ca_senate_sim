@@ -1,20 +1,41 @@
 # scripts/make_bill_pages.R
 
 bills_csv <- "files/csvs/bill_list.csv"
+senator_csv <- "files/csvs/senator_list.csv"
 bills_dir  <- "files/pdfs/bills"
-pages_dir  <- "bills-pages"
+b_pages_dir  <- "bills-pages"
+s_pages_dir  <- "senator-pages"
 
 if (!dir.exists(pages_dir)) dir.create(pages_dir, recursive = TRUE)
 
 # Read your spreadsheet
 bill_list <- read.csv(bills_csv) 
+senator_list <- read.csv(senator_csv)
+
+bill_list <- bill_list %>%
+  mutate(name = paste(First.Name, Last.Name, sep = " "),
+        name_join = tolower(paste0(First.Name, Last.Name)),
+        name_join = gsub(" ", "", name_join),
+        bill_number = paste0("SB-", bill_number)) 
+
+senator_list <- senator_list %>%
+  mutate(name_join = tolower(paste0(First.Name, Last.Name)),
+          name_join = gsub(" ", "", name_join))%>%
+  select(-First.Name, -Last.Name )
+
+bill_list <- left_join(bill_list, senator_list, by = "name_join")
+
 
 for (i in seq_len(nrow(bill_list))) {
   bill_id <- as.character(bill_list$bill_number[i])
   title   <- as.character(bill_list$title[i])
+  header <- paste(bill_id, title, sep = ": ")
+  author <- paste(bill_list$name)
+  district <- as.character(bill_list$District)
   
-  qmd_path <- file.path(pages_dir, paste0("bill_", bill_id, ".qmd"))
-  pdf_rel  <- file.path("..", bills_dir, paste0("bill_", bill_id, ".pdf"))
+  b_qmd_path <- file.path(b_pages_dir, paste0(bill_id, ".qmd"))
+  pdf_rel  <- file.path("..", bills_dir, paste0(bill_id, ".pdf"))
+  s_qmd_path <- file.path(s_pages_dir, paste0("district_", district, ".qmd"))
   
   yaml <- c(
     "---",
@@ -23,8 +44,22 @@ for (i in seq_len(nrow(bill_list))) {
   )
   body <- c(
     "",
-    sprintf("[View the PDF](%s)", pdf_rel)
+    "::: {.panel-tabset}",
+    "",
+    "## Author",
+    "",
+    sprintf("[%s](%s)", name, s_qmd_path),
+    "### View PDF",
+    "",
+    sprintf("[View the PDF](%s)", pdf_rel),
+    "",
+    "## Bill Details",
+    "",
+    "This is temporary content for the second tab. More details about the bill will go here.",
+    "",
+    ":::",
+    ""
   )
-  
-  cat(paste(c(yaml, body), collapse = "\n"), file = qmd_path)
+ 
+  cat(paste(c(yaml, body), collapse = "\n"), file = b_qmd_path)
 }

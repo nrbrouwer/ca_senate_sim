@@ -1,9 +1,9 @@
-﻿bill_number,title,author,lobbyist,committee
-1,Penalizing homeless camping,Shannon Grove,,A
-2,Expanding mail-in voting time,Steve Padilla,,A
-3,Speeding up review times for housing projects,Scott Weiner,,A
-4,Limiting AI usage in state agencies,Mike McGuire,Labor Federation,B
-5,Banning flavored vapes,John Laird,,B
-6,Reducing small business registration fees,Suzette Martinez Valladares,,B
-7,Voicing support for oppressed communities around the world,Lena Gonzalez,,
-8,Celebrating anniversary of Dinseyland,Thomas Umberg,,
+﻿bill_number,title,First Name,Last Name,lobbyist,committee
+1,Penalizing homeless camping,Shannon,Grove,,A
+2,Expanding mail-in voting time,Steve,Padilla,,A
+3,Speeding up review times for housing projects,Scott,Wiener,,A
+4,Limiting AI usage in state agencies,Mike,McGuire,Labor Federation,B
+5,Banning flavored vapes,John,Laird,,B
+6,Reducing small business registration fees,Suzette Martinez,Valladares,,B
+7,Voicing support for oppressed communities around the world,Lena,Gonzalez,,
+8,Celebrating anniversary of Dinseyland,Thomas,Umberg,,
