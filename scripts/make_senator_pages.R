@@ -1,5 +1,7 @@
 # scripts/make_senator_pages.R
 
+library(tidyverse)
+
 senator_csv <- "files/csvs/senator_list.csv"
 senator_dir  <- "files/pdfs/role_profiles/senators"
 s_pages_dir  <- "senator-pages"

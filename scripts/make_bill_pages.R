@@ -1,4 +1,5 @@
 # scripts/make_bill_pages.R
+library(tidyverse)
 
 bills_csv <- "files/csvs/bill_list.csv"
 senator_csv <- "files/csvs/senator_list.csv"
