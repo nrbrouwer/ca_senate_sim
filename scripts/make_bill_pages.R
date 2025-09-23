@@ -6,7 +6,7 @@ bills_dir  <- "files/pdfs/bills"
 b_pages_dir  <- "bills-pages"
 s_pages_dir  <- "senator-pages"
 
-if (!dir.exists(pages_dir)) dir.create(pages_dir, recursive = TRUE)
+if (!dir.exists(b_pages_dir)) dir.create(b_pages_dir, recursive = TRUE)
 
 # Read your spreadsheet
 bill_list <- read.csv(bills_csv) 
