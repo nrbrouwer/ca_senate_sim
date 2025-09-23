@@ -18,7 +18,9 @@ bill_list <- bill_list %>%
         name_join = tolower(paste0(First.Name, Last.Name)),
         name_join = gsub(" ", "", name_join),
         bill_measure = paste0("SB-", bill_number),
-        url = paste0(toupper(Last.Name), "_", "SB", bill_number)) 
+        url = paste0(toupper(Last.Name), "_", "SB", bill_number),
+        committee = ifelse(committee == "" | is.na(committee), "Unassigned", committee),
+        appropriations = ifelse(appropriations == 1, "Yes", "No")) 
 
 senator_list <- senator_list %>%
   mutate(name_join = tolower(paste0(First.Name, Last.Name)),
@@ -32,6 +34,7 @@ for (i in seq_len(nrow(bill_list))) {
   bill_id <- as.character(bill_list$bill_measure[i])
   title   <- paste(bill_list$bill_measure[i], bill_list$title[i], sep = " ")
   committee <- as.character(bill_list$committee[i])
+  appropriations <- as.character(bill_list$appropriations[i])
   header <- paste(bill_id, title, sep = ": ")
   author <- paste(bill_list$name[i])
   district <- as.character(bill_list$District[i])
@@ -56,7 +59,9 @@ for (i in seq_len(nrow(bill_list))) {
     "",
     sprintf("**Committee:** %s", committee),
     "",
-    sprintf("**Text:** [View the PDF](%s)", pdf_rel),
+    sprintf("**Appropriations:** %s", appropriations),
+    "",
+    sprintf("**Text:** [View Bill](%s)", pdf_rel),
     "",
     sprintf('<iframe src="%s" width="100%%" height="600px"></iframe>', pdf_rel),
     "",

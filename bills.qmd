@@ -45,7 +45,7 @@ bill_list$Page <- paste0("[View Details](", b_pages_dir, "/", bill_list$url, ".h
 
 # simple nice table with kableExtra
 bill_list %>%
-  select(bill_measure, title, name, lobbyist, committee, PDF, Page) %>% 
+  select(bill_measure, title, name, lobbyist, committee, appropriations, PDF, Page) %>% 
   gt() %>% 
   fmt_markdown(columns = c("PDF", "Page")) %>%
   cols_label(
