@@ -51,7 +51,7 @@ for (i in seq_len(nrow(bill_list))) {
     "",
     "## Author",
     "",
-    sprintf("[%s](%s)", name, s_qmd_path),
+    sprintf("[%s](%s)", author, s_qmd_path),
     "### View PDF",
     "",
     sprintf("[View the PDF](%s)", pdf_rel),
