@@ -11,6 +11,7 @@ execute:
 ```{r}
 library(gt)
 library(tidyverse)
+library(purrr)
 
 
 bills_csv <- "files/csvs/bill_list.csv"
@@ -20,10 +21,10 @@ b_pages_dir  <- "bills-pages"
 s_pages_dir  <- "senator-pages"
 
 # read the first sheet of your Excel file
-bill_list <- read.csv(bills_csv) 
-senator_list <- read.csv(senator_csv)
+bills <- read.csv(bills_csv) 
+senators <- read.csv(senator_csv)
 
-bill_list <- bill_list %>%
+bills <- bills %>%
   mutate(name = paste(First.Name, Last.Name, sep = " "),
         name_join = tolower(paste0(First.Name, Last.Name)),
         name_join = gsub(" ", "", name_join),
@@ -32,20 +33,103 @@ bill_list <- bill_list %>%
         committee = ifelse(committee == "" | is.na(committee), "Unassigned", committee),
         appropriations = ifelse(appropriations == 1, "Yes", "No")) 
 
-senator_list <- senator_list %>%
+senators <- senators %>%
   mutate(name_join = tolower(paste0(First.Name, Last.Name)),
-          name_join = gsub(" ", "", name_join))%>%
-  select(-First.Name, -Last.Name )
+          name_join = gsub(" ", "", name_join))
+          
+senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
+senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
+s_names <- senators$Name
+d_sen <- senators$Name[senators$Party == "D"]
+r_sen <- senators$Name[senators$Party == "R"]
 
-bill_list <- left_join(bill_list, senator_list, by = "name_join")
+senators <- senators %>%
+  select(-First.Name, -Last.Name, -Name )
 
-bill_list$PDF <- paste0("[View Bill Text](", bills_dir,  "/", bill_list$url, ".pdf)")
+bills <- left_join(bills, senators, by = "name_join")
 
-bill_list$Page <- paste0("[View Details](", b_pages_dir, "/", bill_list$url, ".html)")
+bills$PDF <- paste0("[View Bill Text](", bills_dir,  "/", bills$url, ".pdf)")
 
-# simple nice table with kableExtra
-bill_list %>%
-  select(bill_measure, title, name, lobbyist, committee, appropriations, PDF, Page) %>% 
+bills$Page <- paste0("[View Details](", b_pages_dir, "/", bills$url, ".html)")
+
+# Adding last vote data
+
+clean_votes <- function(votes_df){
+  dat <- votes_df %>%
+    rename_with(~ gsub("\\.", " ", .x)) %>%  
+    rowwise() %>%
+    mutate(across(any_of(s_names), ~ case_when(
+            .x == 1 ~ "Aye",
+            .x == 0 ~ "No",
+            .default = "—"
+          )),   
+          Bill = as.character(Bill),
+          yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
+          no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
+          absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
+          Vote = paste(yes, no, absent, sep = "-"),
+          d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
+          d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
+          d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
+          Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
+          Dem_percent = round((d_yes/(d_yes + d_no + d_absent)*100)),
+          r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
+          r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
+          r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
+          Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
+          Rep_percent = round((r_yes/(r_yes + r_no + r_absent)*100))
+          ) %>%
+    select(Date, Bill, Vote, Result, Dem_percent, Rep_percent, any_of(s_names))
+}
+
+votes_lgl <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=0&single=true&output=csv") 
+votes_anr <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1077921709&single=true&output=csv") 
+votes_blh <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1971997036&single=true&output=csv") 
+votes_app <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=578574660&single=true&output=csv") 
+votes_floor <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=192921423&single=true&output=csv")
+
+votes <- list(lgl = votes_lgl,
+              anr = votes_anr,
+              blh = votes_blh,
+              app = votes_app,
+              floor = votes_floor)
+votes <- lapply(votes, clean_votes)
+
+
+vote_data <- data.frame()
+for (i in 1:nrow(bills)){
+  bill_id <- bills$bill_measure[i]
+
+  matches <- map_dfr(votes, ~ {
+    if(nrow(.x) == 0) return(NULL)
+    .x %>% filter(Bill == bill_id)
+  }, .id = "source")
+
+  if(nrow(matches) > 0) {
+    latest_match <- matches %>%
+      ungroup() %>%
+      filter(Date == max(Date)) %>%
+      select(source, Date, Bill, Vote, Result, Dem_percent, Rep_percent)
+  } else {
+    latest_match <- data.frame() 
+  }
+
+  vote_data = bind_rows(vote_data, latest_match)
+}
+
+bills <- left_join(bills, vote_data, by = c("bill_measure" = "Bill"))
+
+bills <- bills %>%
+  mutate(source = case_when(source == "lgl" ~ "Local Government and Labor",
+                            source == "anr" ~ "Agriculture and Natural Resources",
+                            source == "blh" ~ "Business, Law, and Health",
+                            source == "app" ~ "Appropriations",
+                            source == "floor" ~ "Floor",
+          ))
+
+# table
+bills %>%
+  select(bill_measure, title, name, lobbyist, committee, appropriations, PDF, Page, Vote, Date, source, Result) %>% 
   gt() %>% 
   fmt_markdown(columns = c("PDF", "Page")) %>%
   cols_label(
@@ -53,10 +137,14 @@ bill_list %>%
     title = "Subject",
     name = "Author",
     lobbyist = "Supporting Lobby",
-    committee = "Committee",
+    committee = "Committee Assigned",
     appropriations = "Appropriations",
     Page = "Bill Details",
-    PDF = "PDF"
+    PDF = "PDF",
+    Vote = "Recent Vote",
+    Date = "Vote Date", 
+    source = "Voting Committee",
+    Result = "Vote Result"
   ) %>%
   tab_header(
     title = "Bills",
