@@ -33,7 +33,8 @@ process_votes_table <- function(votes_csv){
             .x == 1 ~ "Aye",
             .x == 0 ~ "No",
             .default = "—"
-          )),      
+          )),   
+          Bill = as.character(Bill),
           yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
           no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
           absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
