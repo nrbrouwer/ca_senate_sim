@@ -62,7 +62,7 @@ process_votes_table <- function(votes_csv){
     gt() %>%
     cols_width(
       everything() ~ px(150)  
-    )   
+    ) %>%
     fmt_markdown(columns = "Bill") %>%
     tab_options(
       table.width = pct(90),
