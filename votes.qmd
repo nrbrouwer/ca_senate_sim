@@ -62,11 +62,14 @@ process_votes_table <- function(votes_csv){
     gt() %>%
     fmt_markdown(columns = "Bill") %>%
     cols_width(
-      everything() ~ px(2000)  
+      everything() ~ px(500)  
     ) %>%
-    tab_options(
-      table.width = pct(90),
-      table.font.size = px(14)
+    tab_style(
+      style = list(
+        cell_text(whitespace = "nowrap"),
+        "width: 150px !important; min-width: 150px !important;"
+      ),
+      locations = cells_body(columns = everything())
     ) %>%
     cols_label(
       Dem_percent = "Democrat Support",
