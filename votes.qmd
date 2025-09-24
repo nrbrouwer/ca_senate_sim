@@ -67,7 +67,7 @@ process_votes_table <- function(votes_csv){
     tab_style(
       style = list(
         cell_text(whitespace = "nowrap"),
-        "width: 150px !important; min-width: 150px !important;"
+        "width: 100px !important; min-width: 100px !important;"
       ),
       locations = cells_body(columns = everything())
     ) %>%
