@@ -60,6 +60,7 @@ process_votes_table <- function(votes_csv){
   # Return the gt table
   dat %>%
     gt() %>%
+    fmt_markdown(columns = "Bill") %>%
     tab_options(
       table.width = pct(90),
       table.font.size = px(14)
