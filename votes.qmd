@@ -7,28 +7,12 @@ execute:
   warning: false
   error: true  
 ---
-::: {.panel-tabset}
-
-## Local Government and Labor
 
 ```{r}
-
-# --- Packages ---
-# (Best practice: install these ahead of time; installing while rendering can fail in CI.)
-for (pkg in c("readr","dplyr","gt","janitor")) {
-  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
-}
 library(readr)
 library(dplyr)
 library(gt)
 library(janitor)
-
-# --- CONFIG: your published CSV link ---
-votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=0&single=true&output=csv"   
-
-# --- READ ---
-dat <- read.csv(votes_csv) %>%
-  rename_with(~ gsub("\\.", " ", .x))
 
 senators <- read.csv("files/csvs/senator_list.csv")
 senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
@@ -40,52 +24,59 @@ r_sen <- senators$Name[senators$Party == "R"]
 bills <- read.csv("files/csvs/bill_list.csv")
 bills$bill_number <- paste0("SB-", bills$bill_number)
 
-# --- Transformation ---
-dat <- dat %>%
-  rowwise() %>%
-  mutate(across(any_of(s_names)), ~ case_when(
-          .x == 1 ~ "Aye",
-          .x == 0 ~ "No",
-          .default =  "—",
-        ),        
-        yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
-        no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
-        absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
-        Vote = paste(yes, no, absent, sep = "-"),
-        d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
-        d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
-        d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
-        Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
-        Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
-        r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
-        r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
-        r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
-        Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
-        Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
-        ) %>%
-  left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
+# Function for creating final vote tables
+process_votes_table <- function(votes_csv){
+  dat <- read.csv(votes_csv) %>%
+    rename_with(~ gsub("\\.", " ", .x)) %>%  
+    rowwise() %>%
+    mutate(across(any_of(s_names), ~ case_when(
+            .x == 1 ~ "Aye",
+            .x == 0 ~ "No",
+            .default = "—"
+          )),      
+          yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
+          no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
+          absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
+          Vote = paste(yes, no, absent, sep = "-"),
+          d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
+          d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
+          d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
+          Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
+          Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
+          r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
+          r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
+          r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
+          Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
+          Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100)
+          ) %>%
+    left_join(bills, by = c("Bill" = "bill_number")) %>%
+    select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent)
 
-# --- RENDER with gt ---
-dat |>
-  gt() |>
-  tab_options(
-    table.width = pct(90)     # 90% of container width
-  ) %>%
-  tab_header(
-    title = md("**Votes**"),
-    subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
-  ) |>
-  # fmt_missing is available in recent gt; if on older gt, comment this out:
-  fmt_missing(columns = everything(), missing_text = "—") |>
-  # Avoid opt_table_font(stack=TRUE) for broader compatibility:
-  # opt_table_font() |>
-  tab_options(
-    table.width = pct(100),
-    table.font.size = px(14)
-  ) |>
-  opt_row_striping() |>
-  tab_source_note(md("Source: Google Sheet (published CSV)"))
+  # Return the gt table
+  dat %>%
+    gt() %>%
+    tab_options(
+      table.width = pct(90),
+      table.font.size = px(14)
+    ) %>%
+    tab_header(
+      title = md("**Votes**"),
+      subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
+    ) %>%
+    fmt_missing(columns = everything(), missing_text = "—") %>%
+    opt_row_striping() %>%
+    tab_source_note(md("Source: Google Sheet (published CSV)"))
+}
+
+```
+
+::: {.panel-tabset}
+
+## Local Government and Labor
+
+```{r}
+
+process_votes_table("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=0&single=true&output=csv") 
 
 ```
 
@@ -93,79 +84,7 @@ dat |>
 
 ```{r}
 
-# --- Packages ---
-# (Best practice: install these ahead of time; installing while rendering can fail in CI.)
-for (pkg in c("readr","dplyr","gt","janitor")) {
-  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
-}
-library(readr)
-library(dplyr)
-library(gt)
-library(janitor)
-
-# --- CONFIG: your published CSV link ---
-votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1077921709&single=true&output=csv"   
-
-# --- READ ---
-dat <- read.csv(votes_csv) %>%
-  rename_with(~ gsub("\\.", " ", .x))
-
-senators <- read.csv("files/csvs/senator_list.csv")
-senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
-senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
-s_names <- senators$Name
-d_sen <- senators$Name[senators$Party == "D"]
-r_sen <- senators$Name[senators$Party == "R"]
-
-bills <- read.csv("files/csvs/bill_list.csv")
-bills$bill_number <- paste0("SB-", bills$bill_number)
-
-# --- Transformation ---
-dat <- dat %>%
-  rowwise() %>%
-  mutate(across(any_of(s_names)), ~ case_when(
-          .x == 1 ~ "Aye",
-          .x == 0 ~ "No",
-          .default =  "—",
-        ),        
-        yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
-        no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
-        absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
-        Vote = paste(yes, no, absent, sep = "-"),
-        d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
-        d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
-        d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
-        Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
-        Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
-        r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
-        r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
-        r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
-        Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
-        Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
-        ) %>%
-  left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
-  
-# --- RENDER with gt ---
-dat |>
-  gt() |>
-  tab_options(
-    table.width = pct(90)     # 90% of container width
-  ) %>%
-  tab_header(
-    title = md("**Votes**"),
-    subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
-  ) |>
-  # fmt_missing is available in recent gt; if on older gt, comment this out:
-  fmt_missing(columns = everything(), missing_text = "—") |>
-  # Avoid opt_table_font(stack=TRUE) for broader compatibility:
-  # opt_table_font() |>
-  tab_options(
-    table.width = pct(100),
-    table.font.size = px(14)
-  ) |>
-  opt_row_striping() |>
-  tab_source_note(md("Source: Google Sheet (published CSV)"))
+process_votes_table("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1077921709&single=true&output=csv")  
 
 ```
 
@@ -173,79 +92,8 @@ dat |>
 
 ```{r}
 
-# --- Packages ---
-# (Best practice: install these ahead of time; installing while rendering can fail in CI.)
-for (pkg in c("readr","dplyr","gt","janitor")) {
-  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
-}
-library(readr)
-library(dplyr)
-library(gt)
-library(janitor)
+process_votes_table("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1971997036&single=true&output=csv")
 
-# --- CONFIG: your published CSV link ---
-votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1971997036&single=true&output=csv"   
-
-# --- READ ---
-dat <- read.csv(votes_csv) %>%
-  rename_with(~ gsub("\\.", " ", .x))
-
-senators <- read.csv("files/csvs/senator_list.csv")
-senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
-senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
-s_names <- senators$Name
-d_sen <- senators$Name[senators$Party == "D"]
-r_sen <- senators$Name[senators$Party == "R"]
-
-bills <- read.csv("files/csvs/bill_list.csv")
-bills$bill_number <- paste0("SB-", bills$bill_number)
-
-# --- Transformation ---
-dat <- dat %>%
-  rowwise() %>%
-  mutate(across(any_of(s_names)), ~ case_when(
-          .x == 1 ~ "Aye",
-          .x == 0 ~ "No",
-          .default =  "—",
-        ),        
-        yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
-        no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
-        absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
-        Vote = paste(yes, no, absent, sep = "-"),
-        d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
-        d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
-        d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
-        Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
-        Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
-        r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
-        r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
-        r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
-        Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
-        Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
-        ) %>%
-  left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
-
-# --- RENDER with gt ---
-dat |>
-  gt() |>
-  tab_options(
-    table.width = pct(90)     # 90% of container width
-  ) %>%
-  tab_header(
-    title = md("**Votes**"),
-    subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
-  ) |>
-  # fmt_missing is available in recent gt; if on older gt, comment this out:
-  fmt_missing(columns = everything(), missing_text = "—") |>
-  # Avoid opt_table_font(stack=TRUE) for broader compatibility:
-  # opt_table_font() |>
-  tab_options(
-    table.width = pct(100),
-    table.font.size = px(14)
-  ) |>
-  opt_row_striping() |>
-  tab_source_note(md("Source: Google Sheet (published CSV)"))
 
 ```
 
@@ -253,79 +101,6 @@ dat |>
 
 ```{r}
 
-# --- Packages ---
-# (Best practice: install these ahead of time; installing while rendering can fail in CI.)
-for (pkg in c("readr","dplyr","gt","janitor")) {
-  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
-}
-library(readr)
-library(dplyr)
-library(gt)
-library(janitor)
-
-# --- CONFIG: your published CSV link ---
-votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=578574660&single=true&output=csv"   
-
-# --- READ ---
-dat <- read.csv(votes_csv) %>%
-  rename_with(~ gsub("\\.", " ", .x)) %>%
-  mutate(Bill = as.character(Bill))
-
-senators <- read.csv("files/csvs/senator_list.csv")
-senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
-senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
-s_names <- senators$Name
-d_sen <- senators$Name[senators$Party == "D"]
-r_sen <- senators$Name[senators$Party == "R"]
-
-bills <- read.csv("files/csvs/bill_list.csv")
-bills$bill_number <- paste0("SB-", bills$bill_number)
-
-# --- Transformation ---
-dat <- dat %>%
-  rowwise() %>%
-  mutate(across(any_of(s_names)), ~ case_when(
-          .x == 1 ~ "Aye",
-          .x == 0 ~ "No",
-          .default =  "—",
-        ),        
-        yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
-        no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
-        absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
-        Vote = paste(yes, no, absent, sep = "-"),
-        d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
-        d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
-        d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
-        Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
-        Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
-        r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
-        r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
-        r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
-        Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
-        Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
-        ) %>%
-  left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
-
-# --- RENDER with gt ---
-dat |>
-  gt() |>
-  tab_options(
-    table.width = pct(90)     # 90% of container width
-  ) %>%
-  tab_header(
-    title = md("**Votes**"),
-    subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
-  ) |>
-  # fmt_missing is available in recent gt; if on older gt, comment this out:
-  fmt_missing(columns = everything(), missing_text = "—") |>
-  # Avoid opt_table_font(stack=TRUE) for broader compatibility:
-  # opt_table_font() |>
-  tab_options(
-    table.width = pct(100),
-    table.font.size = px(14)
-  ) |>
-  opt_row_striping() |>
-  tab_source_note(md("Source: Google Sheet (published CSV)"))
+process_votes_table("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=578574660&single=true&output=csv")
 
 ```
