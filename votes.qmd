@@ -24,7 +24,7 @@ r_sen <- senators$Name[senators$Party == "R"]
 bills <- read.csv("files/csvs/bill_list.csv")
 bills$bill_numbersb <- paste0("SB-", bills$bill_number)
 
-bills_dir  <- "files/pdfs/bills"
+b_pages_dir  <- "bills-pages"
 
 # Function for creating final vote tables
 process_votes_table <- function(votes_csv){
@@ -54,7 +54,7 @@ process_votes_table <- function(votes_csv){
           ) %>%
     left_join(bills, by = c("Bill" = "bill_numbersb")) %>%
     mutate(billnumname = paste0(toupper(Last.Name), "_SB", bill_number),
-          Bill = sprintf("[%s](/%s/%s.html)", Bill, bills_dir, billnumname)) %>%
+          Bill = sprintf("[%s](/%s/%s.html)", Bill, b_pages_dir, billnumname)) %>%
     select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent)
 
   # Return the gt table
