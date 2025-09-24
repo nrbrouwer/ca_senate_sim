@@ -55,7 +55,7 @@ process_votes_table <- function(votes_csv){
     left_join(bills, by = c("Bill" = "bill_numbersb")) %>%
     mutate(billnumname = paste0(toupper(Last.Name), "_SB", bill_number),
           Bill = sprintf("[%s](/%s/%s.html)", Bill, b_pages_dir, billnumname)) %>%
-    select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent)
+    select(Date, Bill, Vote, Result, Dem_percent, Rep_percent, any_of(s_names))
 
   # Return the gt table
   dat %>%
