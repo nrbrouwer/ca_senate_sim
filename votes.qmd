@@ -53,7 +53,7 @@ process_votes_table <- function(votes_csv){
           Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100)
           ) %>%
     left_join(bills, by = c("Bill" = "bill_numbersb")) %>%
-    mutate(billnumname = paste0(toupper(Last.Name), "_SB", bill_number)
+    mutate(billnumname = paste0(toupper(Last.Name), "_SB", bill_number),
           Bill = sprintf("[%s](/%s/%s.html)", Bill, bills_dir, billnumname)) %>%
     select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent)
 
