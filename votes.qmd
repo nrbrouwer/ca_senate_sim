@@ -64,7 +64,7 @@ dat <- dat %>%
         )
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
+  select(Date, Bill, any_of(s_names), Vote_correct, Result, Dem_percent, Rep_percent) 
 
 # --- RENDER with gt ---
 dat |>
@@ -144,7 +144,7 @@ dat <- dat %>%
         )
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
+  select(Date, Bill, any_of(s_names), Vote_correct, Result, Dem_percent, Rep_percent) 
   
 # --- RENDER with gt ---
 dat |>
@@ -224,7 +224,7 @@ dat <- dat %>%
         )
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
+  select(Date, Bill, any_of(s_names), Vote_correct, Result, Dem_percent, Rep_percent) 
 
 # --- RENDER with gt ---
 dat |>
@@ -268,7 +268,8 @@ votes_csv <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VF
 
 # --- READ ---
 dat <- read.csv(votes_csv) %>%
-  rename_with(~ gsub("\\.", " ", .x))
+  rename_with(~ gsub("\\.", " ", .x)) %>%
+  mutate(Bill = as.character(Bill))
 
 senators <- read.csv("files/csvs/senator_list.csv")
 senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
@@ -304,7 +305,7 @@ dat <- dat %>%
         )
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
+  select(Date, Bill, any_of(s_names), Vote_correct, Result, Dem_percent, Rep_percent) 
 
 # --- RENDER with gt ---
 dat |>
