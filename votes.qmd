@@ -38,6 +38,7 @@ d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
 
 bills <- read.csv("files/csvs/bill_list.csv")
+bills$bill_number <- paste0("SB-", bills$bill_number)
 
 # --- Transformation ---
 dat <- dat %>%
@@ -63,6 +64,9 @@ dat <- dat %>%
 # --- RENDER with gt ---
 dat |>
   gt() |>
+  tab_options(
+    table.width = pct(90)     # 90% of container width
+  ) %>%
   tab_header(
     title = md("**Votes**"),
     subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
@@ -109,6 +113,7 @@ d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
 
 bills <- read.csv("files/csvs/bill_list.csv")
+bills$bill_number <- paste0("SB-", bills$bill_number)
 
 # --- Transformation ---
 dat <- dat %>%
@@ -130,10 +135,13 @@ dat <- dat %>%
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
   select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
-
+  
 # --- RENDER with gt ---
 dat |>
   gt() |>
+  tab_options(
+    table.width = pct(90)     # 90% of container width
+  ) %>%
   tab_header(
     title = md("**Votes**"),
     subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
@@ -180,6 +188,7 @@ d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
 
 bills <- read.csv("files/csvs/bill_list.csv")
+bills$bill_number <- paste0("SB-", bills$bill_number)
 
 # --- Transformation ---
 dat <- dat %>%
@@ -205,6 +214,9 @@ dat <- dat %>%
 # --- RENDER with gt ---
 dat |>
   gt() |>
+  tab_options(
+    table.width = pct(90)     # 90% of container width
+  ) %>%
   tab_header(
     title = md("**Votes**"),
     subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
@@ -251,6 +263,7 @@ d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
 
 bills <- read.csv("files/csvs/bill_list.csv")
+bills$bill_number <- paste0("SB-", bills$bill_number)
 
 # --- Transformation ---
 dat <- dat %>%
@@ -276,6 +289,9 @@ dat <- dat %>%
 # --- RENDER with gt ---
 dat |>
   gt() |>
+  tab_options(
+    table.width = pct(90)     # 90% of container width
+  ) %>%
   tab_header(
     title = md("**Votes**"),
     subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
