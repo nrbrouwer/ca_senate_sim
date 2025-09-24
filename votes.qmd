@@ -43,28 +43,28 @@ bills$bill_number <- paste0("SB-", bills$bill_number)
 # --- Transformation ---
 dat <- dat %>%
   rowwise() %>%
-  mutate(yes = sum(c_across(any_of(s_names)) == 1, na.rm = TRUE),
-        no = sum(c_across(any_of(s_names)) == 0, na.rm = TRUE),
-        absent = sum(is.na(c_across(any_of(s_names)))),
+  mutate(across(any_of(s_names)), ~ case_when(
+          .x == 1 ~ "Aye",
+          .x == 0 ~ "No",
+          .default =  "—",
+        ),        
+        yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
+        no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
+        absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
         Vote = paste(yes, no, absent, sep = "-"),
-        d_yes = sum(c_across(any_of(d_sen)) == 1, na.rm = TRUE),
-        d_no = sum(c_across(any_of(d_sen)) == 0, na.rm = TRUE),
-        d_absent = sum(is.na(c_across(any_of(d_sen)))),
+        d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
+        d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
+        d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
         Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
         Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
-        r_yes = sum(c_across(any_of(r_sen)) == 1, na.rm = TRUE),
-        r_no = sum(c_across(any_of(r_sen)) == 0, na.rm = TRUE),
-        r_absent = sum(is.na(c_across(any_of(r_sen)))),
+        r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
+        r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
+        r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
         Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
         Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
-        Vote_correct = case_when(
-          Vote == 1 ~ "Aye",
-          Vote == 0 ~ "No",
-          .default =  "—",
-        )
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote_correct, Result, Dem_percent, Rep_percent) 
+  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
 
 # --- RENDER with gt ---
 dat |>
@@ -123,28 +123,28 @@ bills$bill_number <- paste0("SB-", bills$bill_number)
 # --- Transformation ---
 dat <- dat %>%
   rowwise() %>%
-  mutate(yes = sum(c_across(any_of(s_names)) == 1, na.rm = TRUE),
-        no = sum(c_across(any_of(s_names)) == 0, na.rm = TRUE),
-        absent = sum(is.na(c_across(any_of(s_names)))),
+  mutate(across(any_of(s_names)), ~ case_when(
+          .x == 1 ~ "Aye",
+          .x == 0 ~ "No",
+          .default =  "—",
+        ),        
+        yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
+        no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
+        absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
         Vote = paste(yes, no, absent, sep = "-"),
-        d_yes = sum(c_across(any_of(d_sen)) == 1, na.rm = TRUE),
-        d_no = sum(c_across(any_of(d_sen)) == 0, na.rm = TRUE),
-        d_absent = sum(is.na(c_across(any_of(d_sen)))),
+        d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
+        d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
+        d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
         Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
         Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
-        r_yes = sum(c_across(any_of(r_sen)) == 1, na.rm = TRUE),
-        r_no = sum(c_across(any_of(r_sen)) == 0, na.rm = TRUE),
-        r_absent = sum(is.na(c_across(any_of(r_sen)))),
+        r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
+        r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
+        r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
         Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
         Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
-        Vote_correct = case_when(
-          Vote == 1 ~ "Aye",
-          Vote == 0 ~ "No",
-          .default =  "—",
-        )
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote_correct, Result, Dem_percent, Rep_percent) 
+  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
   
 # --- RENDER with gt ---
 dat |>
@@ -203,28 +203,28 @@ bills$bill_number <- paste0("SB-", bills$bill_number)
 # --- Transformation ---
 dat <- dat %>%
   rowwise() %>%
-  mutate(yes = sum(c_across(any_of(s_names)) == 1, na.rm = TRUE),
-        no = sum(c_across(any_of(s_names)) == 0, na.rm = TRUE),
-        absent = sum(is.na(c_across(any_of(s_names)))),
+  mutate(across(any_of(s_names)), ~ case_when(
+          .x == 1 ~ "Aye",
+          .x == 0 ~ "No",
+          .default =  "—",
+        ),        
+        yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
+        no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
+        absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
         Vote = paste(yes, no, absent, sep = "-"),
-        d_yes = sum(c_across(any_of(d_sen)) == 1, na.rm = TRUE),
-        d_no = sum(c_across(any_of(d_sen)) == 0, na.rm = TRUE),
-        d_absent = sum(is.na(c_across(any_of(d_sen)))),
+        d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
+        d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
+        d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
         Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
         Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
-        r_yes = sum(c_across(any_of(r_sen)) == 1, na.rm = TRUE),
-        r_no = sum(c_across(any_of(r_sen)) == 0, na.rm = TRUE),
-        r_absent = sum(is.na(c_across(any_of(r_sen)))),
+        r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
+        r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
+        r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
         Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
         Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
-        Vote_correct = case_when(
-          Vote == 1 ~ "Aye",
-          Vote == 0 ~ "No",
-          .default =  "—",
-        )
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote_correct, Result, Dem_percent, Rep_percent) 
+  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
 
 # --- RENDER with gt ---
 dat |>
@@ -284,28 +284,28 @@ bills$bill_number <- paste0("SB-", bills$bill_number)
 # --- Transformation ---
 dat <- dat %>%
   rowwise() %>%
-  mutate(yes = sum(c_across(any_of(s_names)) == 1, na.rm = TRUE),
-        no = sum(c_across(any_of(s_names)) == 0, na.rm = TRUE),
-        absent = sum(is.na(c_across(any_of(s_names)))),
+  mutate(across(any_of(s_names)), ~ case_when(
+          .x == 1 ~ "Aye",
+          .x == 0 ~ "No",
+          .default =  "—",
+        ),        
+        yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
+        no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
+        absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
         Vote = paste(yes, no, absent, sep = "-"),
-        d_yes = sum(c_across(any_of(d_sen)) == 1, na.rm = TRUE),
-        d_no = sum(c_across(any_of(d_sen)) == 0, na.rm = TRUE),
-        d_absent = sum(is.na(c_across(any_of(d_sen)))),
+        d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
+        d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
+        d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
         Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
         Dem_percent = (d_yes/(d_yes + d_no + d_absent)*100),
-        r_yes = sum(c_across(any_of(r_sen)) == 1, na.rm = TRUE),
-        r_no = sum(c_across(any_of(r_sen)) == 0, na.rm = TRUE),
-        r_absent = sum(is.na(c_across(any_of(r_sen)))),
+        r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
+        r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
+        r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
         Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
         Rep_percent = (r_yes/(r_yes + r_no + r_absent)*100),
-        Vote_correct = case_when(
-          Vote == 1 ~ "Aye",
-          Vote == 0 ~ "No",
-          .default =  "—",
-        )
         ) %>%
   left_join(bills, by = c("Bill" = "bill_number")) %>%
-  select(Date, Bill, any_of(s_names), Vote_correct, Result, Dem_percent, Rep_percent) 
+  select(Date, Bill, any_of(s_names), Vote, Result, Dem_percent, Rep_percent) 
 
 # --- RENDER with gt ---
 dat |>
