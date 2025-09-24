@@ -60,6 +60,9 @@ process_votes_table <- function(votes_csv){
   # Return the gt table
   dat %>%
     gt() %>%
+    cols_width(
+      everything() ~ px(150)  
+    )   
     fmt_markdown(columns = "Bill") %>%
     tab_options(
       table.width = pct(90),
@@ -70,8 +73,7 @@ process_votes_table <- function(votes_csv){
       subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
     ) %>%
     fmt_missing(columns = everything(), missing_text = "—") %>%
-    opt_row_striping() %>%
-    tab_source_note(md("Source: Google Sheet (published CSV)"))
+    opt_row_striping() 
 }
 
 ```
