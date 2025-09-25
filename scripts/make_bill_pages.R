@@ -118,7 +118,11 @@ for (i in seq_len(nrow(bills))) {
   pdf_rel  <- file.path("..", bills_dir, paste0(url, ".pdf"))
   s_qmd_path <- file.path("..", s_pages_dir, paste0("district_", district, ".qmd"))
   
- 
+  yaml <- c(
+    "---",
+    sprintf('title: "%s"', title),
+    "---"
+  )
   body <- c(
     "",
     "::: {.panel-tabset}",
@@ -176,3 +180,6 @@ for (i in seq_len(nrow(bills))) {
     ":::",
     ""
   )
+ 
+  cat(paste(c(yaml, body), collapse = "\n"), file = b_qmd_path)
+}
