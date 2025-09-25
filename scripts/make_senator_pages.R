@@ -88,6 +88,8 @@ for (i in seq_len(nrow(senators))) {
     "",
     sprintf("[View Profile](%s)", pdf_rel),
     "",
+    sprintf('<iframe src="%s" width="100%%" height="600px"></iframe>', pdf_rel),
+    "",
     "## Vote History",
     "",
     "Placeholder text",
