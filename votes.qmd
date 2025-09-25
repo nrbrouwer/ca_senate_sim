@@ -64,6 +64,10 @@ process_votes_table <- function(votes_csv){
   dat %>%
     gt() %>%
     fmt_markdown(columns = "Bill") %>%
+    fmt_number(
+      columns = c(Dem_percent, Rep_percent),
+      suffix = "%"
+    ) %>%
     tab_options(
       table.width = pct(100)  # Force table to use full width
     ) %>%
