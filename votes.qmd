@@ -16,17 +16,19 @@ library(dplyr)
 library(gt)
 library(janitor)
 
-senators <- read.csv("files/csvs/senator_list.csv")
+bills_csv <- "files/csvs/bill_list.csv"
+senator_csv <- "files/csvs/senator_list.csv"
+b_pages_dir  <- "ca_senate_sim/bills-pages"
+
+senators <- read.csv(senator_csv)
 senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
 senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
 s_names <- senators$Name
 d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
 
-bills <- read.csv("files/csvs/bill_list.csv")
+bills <- read.csv(bills_csv)
 bills$bill_numbersb <- paste0("SB-", bills$bill_number)
-
-b_pages_dir  <- "ca_senate_sim/bills-pages"
 
 # Function for creating final vote tables
 process_votes_table <- function(votes_csv){
