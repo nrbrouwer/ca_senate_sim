@@ -22,6 +22,9 @@ for (i in seq_len(nrow(senator_list))) {
   yaml <- c(
     "---",
     sprintf('title: "%s"', name),
+    "format:",
+    "  html:",
+    "    page-layout: full",  # Uses full page width
     "---"
   )
   body <- c(

@@ -121,6 +121,9 @@ for (i in seq_len(nrow(bills))) {
   yaml <- c(
     "---",
     sprintf('title: "%s"', title),
+    "format:",
+    "  html:",
+    "    page-layout: full",  # Uses full page width
     "---"
   )
   body <- c(

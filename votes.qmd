@@ -1,6 +1,8 @@
 ---
 title: "Votes"
-format: html
+format: 
+  html:
+    page-layout: full
 freeze: auto
 execute:
   echo: false

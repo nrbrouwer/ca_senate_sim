@@ -1,6 +1,9 @@
 ---
 title: "Bills"
-format: html
+format: 
+  html:
+    page-layout: full
+
 execute:
   echo: false
   warning: false
