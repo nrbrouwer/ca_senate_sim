@@ -59,11 +59,13 @@ clean_votes <- function(votes_df){
           d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
           Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
           Dem_percent = round((d_yes/(d_yes + d_no + d_absent)*100)),
+          Dem_percent_sign = paste0(Dem_percent, "%"),
           r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
           r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
           r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
           Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
-          Rep_percent = round((r_yes/(r_yes + r_no + r_absent)*100))
+          Rep_percent = round((r_yes/(r_yes + r_no + r_absent)*100)),
+          Rep_percent_sign = paste0(Rep_percent, "%")
           ) %>%
     select(Date, Bill, Vote, Result, Dem_percent, Rep_percent, any_of(s_names))
 }
@@ -157,17 +159,13 @@ for (i in seq_len(nrow(bills))) {
     "if(nrow(matches) > 0) {",
     "  matches %>%",
     "    gt() %>%",
-    "    text_transform(",
-    "      locations = cells_body(columns = c('Dem_percent', 'Rep_percent')),",
-    "      fn = function(x) paste0(x, '%')",
-    "    ) %>%",
     "    cols_label(",
     "      Date = 'Date',",
     "      source = 'Committee',",
     "      Vote = 'Vote',",
     "      Result = 'Result',",
-    "      Dem_percent = 'Democratic Support',",
-    "      Rep_percent = 'Republican Support'",
+    "      Dem_percent_sign = 'Democratic Support',",
+    "      Rep_percent_sign = 'Republican Support'",
     "    ) %>%",
     "    tab_header(",
     "      title = 'Vote History',",
