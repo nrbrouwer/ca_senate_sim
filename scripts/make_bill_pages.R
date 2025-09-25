@@ -67,7 +67,7 @@ clean_votes <- function(votes_df){
           Rep_percent = round((r_yes/(r_yes + r_no + r_absent)*100)),
           Rep_percent_sign = paste0(Rep_percent, "%")
           ) %>%
-    select(Date, Bill, Vote, Result, Dem_percent, Rep_percent, any_of(s_names))
+    select(Date, Bill, Vote, Result, Dem_percent_sign, Rep_percent_sign, any_of(s_names))
 }
 
 votes_lgl <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=0&single=true&output=csv") 
