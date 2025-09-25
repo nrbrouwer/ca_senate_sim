@@ -26,7 +26,7 @@ r_sen <- senators$Name[senators$Party == "R"]
 bills <- read.csv("files/csvs/bill_list.csv")
 bills$bill_numbersb <- paste0("SB-", bills$bill_number)
 
-b_pages_dir  <- "../bills-pages"
+b_pages_dir  <- "ca_senate_sim/bills-pages"
 
 # Function for creating final vote tables
 process_votes_table <- function(votes_csv){
