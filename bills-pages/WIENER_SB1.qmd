@@ -1,0 +1,52 @@
+---
+title: "SB-1 Speeding up review times for housing projects"
+---
+
+::: {.panel-tabset}
+
+## Details
+
+**Author:** [Scott Wiener](../senator-pages/district_11.qmd)
+
+**Committee:** Local Government and Labor
+
+**Appropriations:** Yes
+
+**Text:** [View Bill](../files/pdfs/bills/WIENER_SB1.pdf)
+
+<iframe src="../files/pdfs/bills/WIENER_SB1.pdf" width="100%" height="600px"></iframe>
+
+## Vote History
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(dplyr)
+library(gt)
+
+ matches %>%
+   gt() %>%
+     tab_header(title = 'Vote History') %>%
+     cols_label(
+       Date = 'Date',
+       source = 'Committee',
+       Vote = 'Vote',
+       Result = 'Result',
+       Dem_percent = 'Democratic Support',
+       Rep_percent = 'Republican Support'
+     ) %>%
+     tab_header(
+       title = 'Vote History',
+       subtitle = 'Sorted by newer to older votes'
+     ) %>%
+     opt_interactive(
+       use_sorting = TRUE,
+       use_highlight = TRUE
+     ) %>%
+     opt_row_striping() 
+
+```
+
+:::

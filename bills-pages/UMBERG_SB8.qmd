@@ -1,0 +1,52 @@
+---
+title: "SB-8 Celebrating anniversary of Dinseyland"
+---
+
+::: {.panel-tabset}
+
+## Details
+
+**Author:** [Thomas Umberg](../senator-pages/district_34.qmd)
+
+**Committee:** Unassigned
+
+**Appropriations:** No
+
+**Text:** [View Bill](../files/pdfs/bills/UMBERG_SB8.pdf)
+
+<iframe src="../files/pdfs/bills/UMBERG_SB8.pdf" width="100%" height="600px"></iframe>
+
+## Vote History
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+
+library(dplyr)
+library(gt)
+
+ matches %>%
+   gt() %>%
+     tab_header(title = 'Vote History') %>%
+     cols_label(
+       Date = 'Date',
+       source = 'Committee',
+       Vote = 'Vote',
+       Result = 'Result',
+       Dem_percent = 'Democratic Support',
+       Rep_percent = 'Republican Support'
+     ) %>%
+     tab_header(
+       title = 'Vote History',
+       subtitle = 'Sorted by newer to older votes'
+     ) %>%
+     opt_interactive(
+       use_sorting = TRUE,
+       use_highlight = TRUE
+     ) %>%
+     opt_row_striping() 
+
+```
+
+:::

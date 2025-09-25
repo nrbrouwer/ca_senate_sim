@@ -107,15 +107,18 @@ for (i in seq_len(nrow(bills))) {
       source == "floor" ~ "Floor",
     ))
   
+  matches_code <- if(nrow(matches) > 0) {
+    matches_str <- capture.output(dput(matches))
+    paste(matches_str, collapse = "\n")
+  } else {
+    "data.frame()"
+  }  
+  
   b_qmd_path <- file.path(b_pages_dir, paste0(url, ".qmd"))
   pdf_rel  <- file.path("..", bills_dir, paste0(url, ".pdf"))
   s_qmd_path <- file.path("..", s_pages_dir, paste0("district_", district, ".qmd"))
   
-  yaml <- c(
-    "---",
-    sprintf('title: "%s"', title),
-    "---"
-  )
+ 
   body <- c(
     "",
     "::: {.panel-tabset}",
@@ -142,32 +145,34 @@ for (i in seq_len(nrow(bills))) {
     "library(dplyr)",
     "library(gt)",
     "",
-    " matches %>%",
-    "   gt() %>%",
-    "     tab_header(title = 'Vote History') %>%",
-    "     cols_label(",
-    "       Date = 'Date',",
-    "       source = 'Committee',",
-    "       Vote = 'Vote',",
-    "       Result = 'Result',",
-    "       Dem_percent = 'Democratic Support',",
-    "       Rep_percent = 'Republican Support'",
-    "     ) %>%",
-    "     tab_header(",
-    "       title = 'Vote History',",
-    "       subtitle = 'Sorted by newer to older votes'",
-    "     ) %>%",
-    "     opt_interactive(",
-    "       use_sorting = TRUE,",
-    "       use_highlight = TRUE",
-    "     ) %>%",
-    "     opt_row_striping() ",
+    paste("matches <-", matches_code),
+    "",
+    "if(nrow(matches) > 0) {",
+    "  matches %>%",
+    "    gt() %>%",
+    "    cols_label(",
+    "      Date = 'Date',",
+    "      source = 'Committee',",
+    "      Vote = 'Vote',",
+    "      Result = 'Result',",
+    "      Dem_percent = 'Democratic Support',",
+    "      Rep_percent = 'Republican Support'",
+    "    ) %>%",
+    "    tab_header(",
+    "      title = 'Vote History',",
+    "      subtitle = 'Sorted by newer to older votes'",
+    "    ) %>%",
+    "    opt_interactive(",
+    "      use_sorting = TRUE,",
+    "      use_highlight = TRUE",
+    "    ) %>%",
+    "    opt_row_striping()",
+    "} else {",
+    "  cat('No vote history available for this bill.')",
+    "}",
     "",
     "```",
     "",
     ":::",
     ""
   )
- 
-  cat(paste(c(yaml, body), collapse = "\n"), file = b_qmd_path)
-}
