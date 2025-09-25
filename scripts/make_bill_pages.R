@@ -100,7 +100,7 @@ for (i in seq_len(nrow(bills))) {
   }, .id = "source")
   
   matches <- matches %>%
-    select(Date, source, Vote, Result, Dem_percent, Rep_percent) %>%
+    select(Date, source, Vote, Result, Dem_percent_sign, Rep_percent_sign) %>%
     arrange(desc(Date)) %>%
     mutate(source = case_when(source == "lgl" ~ "Local Government and Labor",
       source == "anr" ~ "Agriculture and Natural Resources",

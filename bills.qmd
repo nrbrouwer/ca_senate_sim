@@ -10,6 +10,7 @@ execute:
   message: false
 ---
 
+EXAMPLE BILLS
 
 ```{r}
 library(gt)
