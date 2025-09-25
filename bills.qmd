@@ -159,5 +159,14 @@ bills %>%
   tab_header(
     title = "Bills",
     subtitle = "Click a link to open the corresponding PDF"
-  )
+  ) %>%
+  opt_interactive(
+      use_sorting = TRUE,
+      use_search = TRUE,
+      use_filters = FALSE,
+      use_resizers = TRUE,
+      use_highlight = TRUE,
+      page_size_default = 20
+    ) %>%
+    opt_row_striping() 
 ```

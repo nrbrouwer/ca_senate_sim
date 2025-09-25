@@ -80,6 +80,14 @@ process_votes_table <- function(votes_csv){
       subtitle = paste0("Last updated: ", format(Sys.time(), "%Y-%m-%d %H:%M %Z"))
     ) %>%
     fmt_missing(columns = everything(), missing_text = "—") %>%
+    opt_interactive(
+      use_sorting = TRUE,
+      use_search = TRUE,
+      use_filters = FALSE,
+      use_resizers = TRUE,
+      use_highlight = TRUE,
+      page_size_default = 20
+    ) %>%
     opt_row_striping() 
 }
 

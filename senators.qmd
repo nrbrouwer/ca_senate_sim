@@ -52,7 +52,7 @@ senators %>%
   tab_header(
     title = "Senators",
     subtitle = "Click to view senator profile or activity"
-  )%>%
+  ) %>%
   opt_interactive(
     use_sorting = TRUE,
     use_search = TRUE,
