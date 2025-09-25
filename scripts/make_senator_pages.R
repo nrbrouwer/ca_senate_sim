@@ -53,8 +53,8 @@ for (i in seq_len(nrow(senators))) {
   s_qmd_path <- file.path(s_pages_dir, paste0("district_", senator_id, ".qmd"))
   pdf_rel  <- file.path("..", senator_dir, paste0(lastname, "_", senator_id, "_profile.pdf"))
 
-  b_qmd_path1 <- file.path(b_pages_dir, paste0(toupper(lastname), "_SB", bill1, ".qmd"))
-  b_qmd_path2 <- file.path(b_pages_dir, paste0(toupper(lastname), "_SB", bill2, ".qmd"))
+  b_qmd_path1 <- file.path("..", b_pages_dir, paste0(toupper(lastname), "_SB", bill1, ".qmd"))
+  b_qmd_path2 <- file.path("..", b_pages_dir, paste0(toupper(lastname), "_SB", bill2, ".qmd"))
 
   bill_links <- c()
   if(!is.na(bill1)) {
