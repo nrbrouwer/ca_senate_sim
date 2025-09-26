@@ -1,6 +1,7 @@
 # scripts/make_senator_pages.R
 
 library(tidyverse)
+library(purrr)
 
 senator_csv <- "files/csvs/senator_list.csv"
 bills_csv <- "files/csvs/bill_list.csv"
@@ -15,6 +16,13 @@ senators <- read.csv(senator_csv)
 senators <- senators %>%
   mutate(name_join = tolower(paste0(First.Name, Last.Name)),
           name_join = gsub(" ", "", name_join))
+
+senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
+senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
+s_names <- senators$Name
+d_sen <- senators$Name[senators$Party == "D"]
+r_sen <- senators$Name[senators$Party == "R"]
+          
 
 bills <- read.csv(bills_csv)
 bills <- bills %>%
@@ -40,6 +48,54 @@ senator_bills <- senators %>%
   ) %>%
   mutate(across(bill_1:bill_2, ~ as.integer(.)))
 
+#votes data
+
+clean_votes <- function(votes_df){
+  dat <- votes_df %>%
+    rename_with(~ gsub("\\.", " ", .x)) %>%  
+    rowwise() %>%
+    mutate(across(any_of(s_names), ~ case_when(
+            .x == 1 ~ "Aye",
+            .x == 0 ~ "No",
+            .default = "—"
+          )),   
+          Bill = as.character(Bill),
+          yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
+          no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
+          absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
+          Vote = paste(yes, no, absent, sep = "-"),
+          d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
+          d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
+          d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
+          Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
+          Dem_percent = round((d_yes/(d_yes + d_no + d_absent)*100)),
+          Dem_percent_sign = paste0(Dem_percent, "%"),
+          r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
+          r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
+          r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
+          Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
+          Rep_percent = round((r_yes/(r_yes + r_no + r_absent)*100)),
+          Rep_percent_sign = paste0(Rep_percent, "%")
+          ) %>%
+    ungroup()
+}
+
+votes_lgl <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=0&single=true&output=csv") 
+votes_anr <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1077921709&single=true&output=csv") 
+votes_blh <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=1971997036&single=true&output=csv") 
+votes_app <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=578574660&single=true&output=csv") 
+votes_floor <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=192921423&single=true&output=csv")
+
+votes <- list(lgl = votes_lgl,
+              anr = votes_anr,
+              blh = votes_blh,
+              app = votes_app,
+              floor = votes_floor)
+votes <- lapply(votes, clean_votes)
+  
+
+# Loop to create pages
+
 for (i in seq_len(nrow(senators))) {
   senator_id <- as.character(senators$District[i])
   lastname <- tolower(senators$Last.Name[i])
@@ -49,6 +105,46 @@ for (i in seq_len(nrow(senators))) {
   bill2 <- as.character(senator_bills$bill_2[i])
   bill_measure2 <- if(!is.na(bill2)) paste0("SB-", bill2) else NULL
 
+  name <- senators$Name[i]
+
+party_match <- ifelse(party == "D", "Dem_percent", "Rep_percent")
+
+committees <- sapply(votes, function(df) name %in% names(df))
+committees <- which(committees)
+committee_names <- names(votes)[committees]
+
+committee_fullnames <- c(
+  "lgl" = "Local Government and Labor",
+  "anr" = "Agriculture and Natural Resources", 
+  "blh" = "Business, Law, and Health",
+  "app" = "Appropriations",
+  "floor" = "Floor"
+)
+committee_names <- committee_fullnames[committee_names]
+
+committee_names <- paste(committee_names, sep = ",")
+
+votes_including_s <- votes[committees]
+votes_including_s <- votes_including_s[sapply(votes_including_s, function(df) nrow(df) > 0)] # removing empty dfs because they cause binding issues
+votes_including_s <- bind_rows(votes_including_s, .id = "Committee")
+
+votes_including_s <- votes_including_s %>%
+  select(Date, Bill, Committee, name, party_match) %>%
+  mutate(party_pecent = paste0(.data[[party_match]], "%"),
+        party_vote = ifelse(.data[[party_match]] >= 50, 1, 0),
+        party_aligned = case_when(
+          party_vote == 1 & .data[[name]] == "Aye" ~ "Yes",
+          party_vote == 0 & .data[[name]] == "No" ~ "Yes",
+          party_vote == 1 & .data[[name]] == "No" ~ "No",
+          party_vote == 0 & .data[[name]] == "Aye" ~ "No",
+          TRUE ~ ""
+        )) %>%
+  select(Date, Bill, Committee, name, party_pecent, party_aligned) %>%
+  rename("Vote" = name,
+        "Party Vote" = party_pecent,
+        "Party Aligned" = party_aligned)  %>%
+  arrange(desc(Date))
+  
   
   s_qmd_path <- file.path(s_pages_dir, paste0("district_", senator_id, ".qmd"))
   pdf_rel  <- file.path("..", senator_dir, paste0(lastname, "_", senator_id, "_profile.pdf"))
@@ -80,7 +176,7 @@ for (i in seq_len(nrow(senators))) {
     "",
     sprintf("**District:** %s", senator_id),
     "",
-    sprintf("**Committee Assignments:**"),
+    sprintf("**Committee Assignments:** %s", committee_names),
     "",
     sprintf("**Bills:**"),
     "",
@@ -92,9 +188,34 @@ for (i in seq_len(nrow(senators))) {
     "",
     "## Vote History",
     "",
-    "Placeholder text",
+    "```{r}",
+    "#| echo: false",
+    "#| warning: false",
+    "#| message: false",
     "",
-    ":::"
+    "library(dplyr)",
+    "library(gt)",
+    "",
+    "if(nrow(votes_including_s) > 0) {",
+    "  votes_including_s %>%",
+    "    gt() %>%",
+    "    tab_header(",
+    "      title = 'Vote History',",
+    "      subtitle = 'Sorted by newer to older votes'",
+    "    ) %>%",
+    "    opt_interactive(",
+    "      use_sorting = TRUE,",
+    "      use_highlight = TRUE",
+    "    ) %>%",
+    "    opt_row_striping()",
+    "} else {",
+    "  cat('No vote history available for this bill.')",
+    "}",
+    "",
+    "```",
+    "",
+    ":::",
+    ""
   )
   
   cat(paste(c(yaml, body), collapse = "\n"), file = s_qmd_path)
