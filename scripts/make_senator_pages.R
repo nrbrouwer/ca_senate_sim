@@ -122,8 +122,9 @@ committee_fullnames <- c(
   "floor" = "Floor"
 )
 committee_names <- committee_fullnames[committee_names]
+committee_names <- committee_names[committee_names != "Floor"]
 
-committee_names <- paste(committee_names,  collapse = ", ")
+committee_names <- paste(committee_names,  collapse = "; ")
 
 votes_including_s <- votes[committees]
 # Keep only non-empty dataframes
@@ -152,6 +153,14 @@ if(length(votes_including_s) > 0) {
           party_vote == 0 & .data[[name]] == "No" ~ "Yes",
           party_vote == 1 & .data[[name]] == "No" ~ "No",
           party_vote == 0 & .data[[name]] == "Aye" ~ "No",
+          TRUE ~ ""
+        ),
+        Committee = case_when(
+          Committee == "lgl" ~ "Local Government and Labor",
+          Committee == "anr" ~ "Agriculture and Natural Resources", 
+          Committee == "blh" ~ "Business, Law, and Health",
+          Committee == "app" ~ "Appropriations",
+          Committee == "floor" ~ "Floor"
           TRUE ~ ""
         )) %>%
       select(Date, Bill, Committee, all_of(name), party_percent, party_aligned) %>%  # Use all_of() here too
