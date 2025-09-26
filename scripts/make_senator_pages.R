@@ -131,6 +131,7 @@ votes_including_s <- votes[committees]
 votes_including_s <- Filter(function(df) {
   !is.null(df) && is.data.frame(df) && nrow(df) > 0
 }, votes_including_s)
+  
 
 # Check if we have any dataframes left
 if(length(votes_including_s) > 0) {
