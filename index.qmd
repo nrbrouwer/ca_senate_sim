@@ -4,8 +4,7 @@ title: "Welcome to the 2025 UC Merced California Legislative Simulation Tracker"
 
 This website is your one-stop-shop for all documents and activity in the simulation. 
 
-Votes are updated approximately hourly.
-
+Updates occur hourly between :15 and :30 past the hour. If you run into errors, please check back in after the hourly update before reporting issues.
 
 
 <div style="text-align: center;">
