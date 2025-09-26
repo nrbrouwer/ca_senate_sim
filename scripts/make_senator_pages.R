@@ -106,6 +106,7 @@ for (i in seq_len(nrow(senators))) {
   bill_measure2 <- if(!is.na(bill2)) paste0("SB-", bill2) else NULL
 
   name <- senators$Name[i]
+  party <- senators$Party[i]
 
 party_match <- ifelse(party == "D", "Dem_percent", "Rep_percent")
 
@@ -122,7 +123,7 @@ committee_fullnames <- c(
 )
 committee_names <- committee_fullnames[committee_names]
 
-committee_names <- paste(committee_names, sep = ",")
+committee_names <- paste(committee_names,  collapse = ", ")
 
 votes_including_s <- votes[committees]
 votes_including_s <- votes_including_s[sapply(votes_including_s, function(df) nrow(df) > 0)] # removing empty dfs because they cause binding issues
@@ -130,7 +131,7 @@ votes_including_s <- bind_rows(votes_including_s, .id = "Committee")
 
 votes_including_s <- votes_including_s %>%
   select(Date, Bill, Committee, name, party_match) %>%
-  mutate(party_pecent = paste0(.data[[party_match]], "%"),
+  mutate(party_percent = paste0(.data[[party_match]], "%"),
         party_vote = ifelse(.data[[party_match]] >= 50, 1, 0),
         party_aligned = case_when(
           party_vote == 1 & .data[[name]] == "Aye" ~ "Yes",
@@ -139,9 +140,9 @@ votes_including_s <- votes_including_s %>%
           party_vote == 0 & .data[[name]] == "Aye" ~ "No",
           TRUE ~ ""
         )) %>%
-  select(Date, Bill, Committee, name, party_pecent, party_aligned) %>%
+  select(Date, Bill, Committee, name, party_percent, party_aligned) %>%
   rename("Vote" = name,
-        "Party Vote" = party_pecent,
+        "Party Vote" = party_percent,
         "Party Aligned" = party_aligned)  %>%
   arrange(desc(Date))
   
@@ -195,6 +196,8 @@ votes_including_s <- votes_including_s %>%
     "",
     "library(dplyr)",
     "library(gt)",
+    "",
+    paste("votes_including_s <-", votes_including_s),
     "",
     "if(nrow(votes_including_s) > 0) {",
     "  votes_including_s %>%",
