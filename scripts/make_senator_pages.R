@@ -160,7 +160,7 @@ if(length(votes_including_s) > 0) {
           Committee == "anr" ~ "Agriculture and Natural Resources", 
           Committee == "blh" ~ "Business, Law, and Health",
           Committee == "app" ~ "Appropriations",
-          Committee == "floor" ~ "Floor"
+          Committee == "floor" ~ "Floor",
           TRUE ~ ""
         )) %>%
       select(Date, Bill, Committee, all_of(name), party_percent, party_aligned) %>%  # Use all_of() here too
