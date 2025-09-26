@@ -146,6 +146,12 @@ votes_including_s <- votes_including_s %>%
         "Party Aligned" = party_aligned)  %>%
   arrange(desc(Date))
   
+vote_table <- if(nrow(votes_including_s) > 0) {
+  votes_str <- capture.output(dput(votes_including_s))
+  paste(votes_str, collapse = "\n")
+} else {
+  "data.frame()"
+}
   
   s_qmd_path <- file.path(s_pages_dir, paste0("district_", senator_id, ".qmd"))
   pdf_rel  <- file.path("..", senator_dir, paste0(lastname, "_", senator_id, "_profile.pdf"))
@@ -197,7 +203,7 @@ votes_including_s <- votes_including_s %>%
     "library(dplyr)",
     "library(gt)",
     "",
-    paste("votes_including_s <-", votes_including_s),
+    paste("votes_including_s <-", vote_table),
     "",
     "if(nrow(votes_including_s) > 0) {",
     "  votes_including_s %>%",
