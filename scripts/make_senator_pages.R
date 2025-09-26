@@ -126,10 +126,34 @@ committee_names <- committee_fullnames[committee_names]
 committee_names <- paste(committee_names,  collapse = ", ")
 
 votes_including_s <- votes[committees]
+# Keep only non-empty dataframes
 votes_including_s <- Filter(function(df) {
   !is.null(df) && is.data.frame(df) && nrow(df) > 0
 }, votes_including_s)
-votes_including_s <- bind_rows(votes_including_s, .id = "Committee")
+
+# Check if we have any dataframes left
+if(length(votes_including_s) > 0) {
+  # Debug: check what columns each dataframe has
+  cat("Columns in each dataframe:\n")
+  lapply(names(votes_including_s), function(name) {
+    cat(name, ":", paste(colnames(votes_including_s[[name]]), collapse = ", "), "\n")
+  })
+  
+  votes_including_s <- bind_rows(votes_including_s, .id = "Committee")
+  
+  # Check if Date column exists after binding
+  if("Date" %in% colnames(votes_including_s) && name %in% colnames(votes_including_s)) {
+    votes_including_s <- votes_including_s %>%
+      select(Date, Bill, Committee, all_of(name), all_of(party_match)) %>%
+      # ... rest of your code
+  } else {
+    # Handle case where columns don't exist
+    votes_including_s <- data.frame()
+  }
+} else {
+  # No dataframes with data for this senator
+  votes_including_s <- data.frame()
+}
 
 votes_including_s <- votes_including_s %>%
   select(Date, Bill, Committee, all_of(name), all_of(party_match)) %>%  # Use all_of() for variables
