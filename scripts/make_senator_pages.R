@@ -126,7 +126,9 @@ committee_names <- committee_fullnames[committee_names]
 committee_names <- paste(committee_names,  collapse = ", ")
 
 votes_including_s <- votes[committees]
-votes_including_s <- votes_including_s[sapply(votes_including_s, function(df) nrow(df) > 0)] # removing empty dfs because they cause binding issues
+votes_including_s <- votes_including_s[sapply(votes_including_s, function(df) {
+  !is.null(df) && is.data.frame(df) && nrow(df) > 0
+})] # removing empty dfs because they cause binding issues
 votes_including_s <- bind_rows(votes_including_s, .id = "Committee")
 
 votes_including_s <- votes_including_s %>%
