@@ -130,7 +130,7 @@ votes_including_s <- votes_including_s[sapply(votes_including_s, function(df) nr
 votes_including_s <- bind_rows(votes_including_s, .id = "Committee")
 
 votes_including_s <- votes_including_s %>%
-  select(Date, Bill, Committee, name, party_match) %>%
+  select(Date, Bill, Committee, all_of(name), all_of(party_match)) %>%  # Use all_of() for variables
   mutate(party_percent = paste0(.data[[party_match]], "%"),
         party_vote = ifelse(.data[[party_match]] >= 50, 1, 0),
         party_aligned = case_when(
@@ -140,8 +140,8 @@ votes_including_s <- votes_including_s %>%
           party_vote == 0 & .data[[name]] == "Aye" ~ "No",
           TRUE ~ ""
         )) %>%
-  select(Date, Bill, Committee, name, party_percent, party_aligned) %>%
-  rename("Vote" = name,
+  select(Date, Bill, Committee, all_of(name), party_percent, party_aligned) %>%  # Use all_of() here too
+  rename("Vote" = all_of(name),  # And here
         "Party Vote" = party_percent,
         "Party Aligned" = party_aligned)  %>%
   arrange(desc(Date))
