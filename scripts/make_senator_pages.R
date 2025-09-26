@@ -144,8 +144,21 @@ if(length(votes_including_s) > 0) {
   # Check if Date column exists after binding
   if("Date" %in% colnames(votes_including_s) && name %in% colnames(votes_including_s)) {
     votes_including_s <- votes_including_s %>%
-      select(Date, Bill, Committee, all_of(name), all_of(party_match)) %>%
-      # ... rest of your code
+      select(Date, Bill, Committee, all_of(name), all_of(party_match)) %>%  # Use all_of() for variables
+      mutate(party_percent = paste0(.data[[party_match]], "%"),
+        party_vote = ifelse(.data[[party_match]] >= 50, 1, 0),
+        party_aligned = case_when(
+          party_vote == 1 & .data[[name]] == "Aye" ~ "Yes",
+          party_vote == 0 & .data[[name]] == "No" ~ "Yes",
+          party_vote == 1 & .data[[name]] == "No" ~ "No",
+          party_vote == 0 & .data[[name]] == "Aye" ~ "No",
+          TRUE ~ ""
+        )) %>%
+      select(Date, Bill, Committee, all_of(name), party_percent, party_aligned) %>%  # Use all_of() here too
+      rename("Vote" = all_of(name),  # And here
+        "Party Vote" = party_percent,
+        "Party Aligned" = party_aligned)  %>%
+      arrange(desc(Date))
   } else {
     # Handle case where columns don't exist
     votes_including_s <- data.frame()
@@ -155,22 +168,7 @@ if(length(votes_including_s) > 0) {
   votes_including_s <- data.frame()
 }
 
-votes_including_s <- votes_including_s %>%
-  select(Date, Bill, Committee, all_of(name), all_of(party_match)) %>%  # Use all_of() for variables
-  mutate(party_percent = paste0(.data[[party_match]], "%"),
-        party_vote = ifelse(.data[[party_match]] >= 50, 1, 0),
-        party_aligned = case_when(
-          party_vote == 1 & .data[[name]] == "Aye" ~ "Yes",
-          party_vote == 0 & .data[[name]] == "No" ~ "Yes",
-          party_vote == 1 & .data[[name]] == "No" ~ "No",
-          party_vote == 0 & .data[[name]] == "Aye" ~ "No",
-          TRUE ~ ""
-        )) %>%
-  select(Date, Bill, Committee, all_of(name), party_percent, party_aligned) %>%  # Use all_of() here too
-  rename("Vote" = all_of(name),  # And here
-        "Party Vote" = party_percent,
-        "Party Aligned" = party_aligned)  %>%
-  arrange(desc(Date))
+
   
 vote_table <- if(nrow(votes_including_s) > 0) {
   votes_str <- capture.output(dput(votes_including_s))
