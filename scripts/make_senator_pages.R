@@ -205,9 +205,9 @@ vote_table <- if(nrow(votes_including_s) > 0) {
   if(!is.na(bill1)) {
     bill_links <- c(bill_links, sprintf("[%s](%s)", bill_measure1, b_qmd_path1))
   }
-  #if(!is.na(bill2)) {
-  #  bill_links <- c(bill_links, sprintf("[%s](%s)", bill_measure2, b_qmd_path2))
-  #}
+  if(!is.na(bill2)) {
+    bill_links <- c(bill_links, sprintf("[%s](%s)", bill_measure2, b_qmd_path2))
+  }
 
   yaml <- c(
     "---",
@@ -227,7 +227,7 @@ vote_table <- if(nrow(votes_including_s) > 0) {
     "",
     sprintf("**Committee Assignments:** %s", committee_names),
     "",
-    sprintf("**Bills:**"),
+    "**Bills:**",
     "",
     bill_links,
     "",
