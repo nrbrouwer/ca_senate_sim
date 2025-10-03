@@ -132,7 +132,7 @@ if(length(votes) > 0) {
 
     vote_data = bind_rows(vote_data, latest_match)
   }
-  
+
   bills <- left_join(bills, vote_data, by = c("bill_measure" = "Bill"))
 
   bills <- bills %>%
@@ -145,11 +145,10 @@ if(length(votes) > 0) {
     ))
   }
 
-
-
 bills_table <- bills %>%
   select(bill_measure, title, name, lobbyist, committee, appropriations, PDF, Page, any_of(c("Vote", "Date", "source", "Result")))  # Use any_of() for vote columns
 
+if(length(votes) > 0) {
 bills_table %>%
   gt() %>% 
   fmt_markdown(columns = c("PDF", "Page")) %>%
@@ -180,4 +179,32 @@ bills_table %>%
       page_size_default = 20
     ) %>%
     opt_row_striping()
+} else {
+  bills_table %>%
+  gt() %>% 
+  fmt_markdown(columns = c("PDF", "Page")) %>%
+  cols_label(
+    bill_measure = "Bill",
+    title = "Subject",
+    name = "Author",
+    lobbyist = "Supporting Lobby",
+    committee = "Committee Assigned",
+    appropriations = "Appropriations",
+    Page = "Bill Details",
+    PDF = "PDF"
+  ) %>%
+  tab_header(
+    title = "Bills",
+    subtitle = "Click a link to open the corresponding PDF"
+  ) %>%
+  opt_interactive(
+      use_sorting = TRUE,
+      use_search = TRUE,
+      use_filters = FALSE,
+      use_resizers = TRUE,
+      use_highlight = TRUE,
+      page_size_default = 20
+    ) %>%
+    opt_row_striping()
+}
 ```
