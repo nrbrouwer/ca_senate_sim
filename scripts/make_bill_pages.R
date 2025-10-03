@@ -16,10 +16,11 @@ senators <- read.csv(senator_csv)
 
 bills <- bills %>%
   mutate(name = paste(First.Name, Last.Name, sep = " "),
+        Last.Name_link = gsub(" ", "_", Last.Name),
         name_join = tolower(paste0(First.Name, Last.Name)),
         name_join = gsub(" ", "", name_join),
         bill_measure = paste0("SB-", bill_number),
-        url = paste0(toupper(Last.Name), "_", "SB", bill_number),
+        url = paste0(toupper(Last.Name_link), "_", "SB", bill_number),
         committee = ifelse(committee == "" | is.na(committee), "Unassigned", committee),
         appropriations = ifelse(appropriations == 1, "Yes", "No")) 
 
@@ -34,7 +35,7 @@ d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
 
 senators <- senators %>%
-  select(-First.Name, -Last.Name, -Name )
+  select(-First.Name, -Last.Name, -Name)
 
 bills <- left_join(bills, senators, by = "name_join")
 

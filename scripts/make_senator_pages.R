@@ -19,6 +19,9 @@ senators <- senators %>%
 
 senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
 senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
+senators <- senators %>%
+  mutate(Last.Name_Link = gsub(" ", "_", Last.Name))
+
 s_names <- senators$Name
 d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
@@ -30,11 +33,6 @@ bills <- bills %>%
         name_join = tolower(paste0(First.Name, Last.Name)),
         name_join = gsub(" ", "", name_join),
         bill_measure = paste0("SB-", bill_number))
-
-bill_add <- data.frame(name_join = "scottwiener",
-                      bill_measure = "SB-10",
-                      bill_number = 10)
-bills <- bind_rows(bills, bill_add)
 
 senator_bills <- senators %>%
   left_join(bills, by = "name_join") %>%
@@ -105,11 +103,14 @@ votes <- lapply(votes, clean_votes)
 
 for (i in seq_len(nrow(senators))) {
   senator_id <- as.character(senators$District[i])
-  lastname <- tolower(senators$Last.Name[i])
+  name_link <- tolower(senators$Last.Name_Link[i])
   name   <- paste(senators$First.Name[i], senators$Last.Name[i], sep = " ")
+  senate_name <- as.character(senators$name_join[i])
+  senator_bills <- senator_bills %>%
+    filter(name_join %in% senate_name)
   bill1 <- as.character(senator_bills$bill_1[i])
   bill_measure1 <- if(!is.na(bill1)) paste0("SB-", bill1) else NULL
-  bill2 <- as.character(senator_bills$bill_2[i])
+  bill2 <- as.character(senator_bills$bill_2[i + 1])
   bill_measure2 <- if(!is.na(bill2)) paste0("SB-", bill2) else NULL
 
   name <- senators$Name[i]
@@ -195,10 +196,10 @@ vote_table <- if(nrow(votes_including_s) > 0) {
 }
   
   s_qmd_path <- file.path(s_pages_dir, paste0("district_", senator_id, ".qmd"))
-  pdf_rel  <- file.path("..", senator_dir, paste0(lastname, "_", senator_id, "_profile.pdf"))
+  pdf_rel  <- file.path("..", senator_dir, paste0(name_link, "_", senator_id, "_profile.pdf"))
 
-  b_qmd_path1 <- file.path("..", b_pages_dir, paste0(toupper(lastname), "_SB", bill1, ".qmd"))
-  b_qmd_path2 <- file.path("..", b_pages_dir, paste0(toupper(lastname), "_SB", bill2, ".qmd"))
+  b_qmd_path1 <- file.path("..", b_pages_dir, paste0(toupper(name_link), "_SB", bill1, ".qmd"))
+  b_qmd_path2 <- file.path("..", b_pages_dir, paste0(toupper(name_link), "_SB", bill2, ".qmd"))
 
   bill_links <- c()
   if(!is.na(bill1)) {
