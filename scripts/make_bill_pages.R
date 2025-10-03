@@ -102,7 +102,7 @@ for (i in seq_len(nrow(bills))) {
   url <- as.character(bills$url[i])
 
   matches <- map_dfr(votes, ~ {
-    if(nrow(.x) == 0) return(NULL)
+    if(is.null(.x) || nrow(.x) == 0) return(NULL)
     .x %>% filter(Bill == bill_id)
   }, .id = "source")
   
