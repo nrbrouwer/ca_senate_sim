@@ -101,27 +101,29 @@ for (i in seq_len(nrow(bills))) {
   district <- as.character(bills$District[i])
   url <- as.character(bills$url[i])
 
-  matches <- map_dfr(votes, ~ {
+matches <- map_dfr(votes, ~ {
     if(is.null(.x) || nrow(.x) == 0) return(NULL)
     .x %>% filter(Bill == bill_id)
   }, .id = "source")
-  
+
+# Check if matches has any rows before processing
+if(!is.null(matches) && nrow(matches) > 0) {
   matches <- matches %>%
     select(Date, source, Vote, Result, Dem_percent_sign, Rep_percent_sign) %>%
     arrange(desc(Date)) %>%
-    mutate(source = case_when(source == "lgl" ~ "Local Government and Labor",
+    mutate(source = case_when(
+      source == "lgl" ~ "Local Government and Labor",
       source == "anr" ~ "Agriculture and Natural Resources",
       source == "blh" ~ "Business, Law, and Health",
       source == "app" ~ "Appropriations",
       source == "floor" ~ "Floor",
     ))
   
-  matches_code <- if(nrow(matches) > 0) {
-    matches_str <- capture.output(dput(matches))
-    paste(matches_str, collapse = "\n")
-  } else {
-    "data.frame()"
-  }  
+  matches_code <- capture.output(dput(matches)) %>%
+    paste(collapse = "\n")
+} else {
+  matches_code <- "data.frame()"
+}
   
   b_qmd_path <- file.path(b_pages_dir, paste0(url, ".qmd"))
   pdf_rel  <- file.path("..", bills_dir, paste0(url, ".pdf"))
