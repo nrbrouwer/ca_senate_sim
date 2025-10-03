@@ -35,11 +35,13 @@ bills$bill_numbersb <- paste0("SB-", bills$bill_number)
 # Function for creating final vote tables
 process_votes_table <- function(votes_csv){
 
+  dat <- read.csv(votes_csv)
+
   if(nrow(dat) == 0) {
     return(NULL)
   }
 
-  dat <- read.csv(votes_csv) %>%
+  dat <- dat %>%
     rename_with(~ gsub("\\.", " ", .x)) %>%  
     rowwise() %>%
     mutate(across(any_of(s_names), ~ case_when(
