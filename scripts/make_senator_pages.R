@@ -108,9 +108,9 @@ for (i in seq_len(nrow(senators))) {
   senate_name <- as.character(senators$name_join[i])
   senator_bills_sub <- senator_bills %>%
     filter(name_join %in% senate_name)
-  bill1 <- as.character(senator_bills_sub$bill_1[i])
+  bill1 <- as.character(senator_bills_sub$bill_1[1])
   bill_measure1 <- if(!is.na(bill1)) paste0("SB-", bill1) else NULL
-  bill2 <- as.character(senator_bills_sub$bill_2[i + 1])
+  bill2 <- as.character(senator_bills_sub$bill_2[2])
   bill_measure2 <- if(!is.na(bill2)) paste0("SB-", bill2) else NULL
 
   name <- senators$Name[i]
