@@ -132,18 +132,20 @@ if(length(votes) > 0) {
 
     vote_data = bind_rows(vote_data, latest_match)
   }
-}
+  
+  bills <- left_join(bills, vote_data, by = c("bill_measure" = "Bill"))
 
-bills <- left_join(bills, vote_data, by = c("bill_measure" = "Bill"))
+  bills <- bills %>%
+    mutate(source = case_when(
+      source == "lgl" ~ "Local Government and Labor",
+      source == "anr" ~ "Agriculture and Natural Resources",
+      source == "blh" ~ "Business, Law, and Health",
+      source == "app" ~ "Appropriations",
+      source == "floor" ~ "Floor",
+    ))
+  }
 
-bills <- bills %>%
-  mutate(source = case_when(
-    source == "lgl" ~ "Local Government and Labor",
-    source == "anr" ~ "Agriculture and Natural Resources",
-    source == "blh" ~ "Business, Law, and Health",
-    source == "app" ~ "Appropriations",
-    source == "floor" ~ "Floor",
-  ))
+
 
 bills_table <- bills %>%
   select(bill_measure, title, name, lobbyist, committee, appropriations, PDF, Page, any_of(c("Vote", "Date", "source", "Result")))  # Use any_of() for vote columns
