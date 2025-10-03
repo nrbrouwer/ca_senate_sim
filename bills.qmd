@@ -59,7 +59,14 @@ bills$Page <- paste0("[View Details](", b_pages_dir, "/", bills$url, ".html)")
 # Adding last vote data
 
 clean_votes <- function(votes_df){
-  dat <- votes_df %>%
+
+  dat <- votes_df
+
+  if(nrow(dat) == 0) {
+    return(NULL)
+  }
+
+  dat <- dat %>%
     rename_with(~ gsub("\\.", " ", .x)) %>%  
     rowwise() %>%
     mutate(across(any_of(s_names), ~ case_when(
@@ -99,41 +106,49 @@ votes <- list(lgl = votes_lgl,
               floor = votes_floor)
 votes <- lapply(votes, clean_votes)
 
+# Filter out NULL values from votes list
+votes <- votes[!sapply(votes, is.null)]
 
 vote_data <- data.frame()
-for (i in 1:nrow(bills)){
-  bill_id <- bills$bill_measure[i]
 
-  matches <- map_dfr(votes, ~ {
-    if(nrow(.x) == 0) return(NULL)
-    .x %>% filter(Bill == bill_id)
-  }, .id = "source")
+# Only process if there are non-NULL votes
+if(length(votes) > 0) {
+  for (i in 1:nrow(bills)){
+    bill_id <- bills$bill_measure[i]
 
-  if(nrow(matches) > 0) {
-    latest_match <- matches %>%
-      ungroup() %>%
-      filter(Date == max(Date)) %>%
-      select(source, Date, Bill, Vote, Result, Dem_percent, Rep_percent)
-  } else {
-    latest_match <- data.frame() 
+    matches <- map_dfr(votes, ~ {
+      if(is.null(.x) || nrow(.x) == 0) return(NULL)
+      .x %>% filter(Bill == bill_id)
+    }, .id = "source")
+
+    if(!is.null(matches) && nrow(matches) > 0) {
+      latest_match <- matches %>%
+        ungroup() %>%
+        filter(Date == max(Date)) %>%
+        select(source, Date, Bill, Vote, Result, Dem_percent, Rep_percent)
+    } else {
+      latest_match <- data.frame() 
+    }
+
+    vote_data = bind_rows(vote_data, latest_match)
   }
-
-  vote_data = bind_rows(vote_data, latest_match)
 }
 
 bills <- left_join(bills, vote_data, by = c("bill_measure" = "Bill"))
 
 bills <- bills %>%
-  mutate(source = case_when(source == "lgl" ~ "Local Government and Labor",
-                            source == "anr" ~ "Agriculture and Natural Resources",
-                            source == "blh" ~ "Business, Law, and Health",
-                            source == "app" ~ "Appropriations",
-                            source == "floor" ~ "Floor",
-          ))
+  mutate(source = case_when(
+    source == "lgl" ~ "Local Government and Labor",
+    source == "anr" ~ "Agriculture and Natural Resources",
+    source == "blh" ~ "Business, Law, and Health",
+    source == "app" ~ "Appropriations",
+    source == "floor" ~ "Floor",
+  ))
 
-# table
-bills %>%
-  select(bill_measure, title, name, lobbyist, committee, appropriations, PDF, Page, Vote, Date, source, Result) %>% 
+bills_table <- bills %>%
+  select(bill_measure, title, name, lobbyist, committee, appropriations, PDF, Page, any_of(c("Vote", "Date", "source", "Result")))  # Use any_of() for vote columns
+
+bills_table %>%
   gt() %>% 
   fmt_markdown(columns = c("PDF", "Page")) %>%
   cols_label(
@@ -162,5 +177,5 @@ bills %>%
       use_highlight = TRUE,
       page_size_default = 20
     ) %>%
-    opt_row_striping() 
+    opt_row_striping()
 ```
