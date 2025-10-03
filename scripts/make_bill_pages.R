@@ -41,7 +41,14 @@ bills <- left_join(bills, senators, by = "name_join")
 # Vote data
 
 clean_votes <- function(votes_df){
-  dat <- votes_df %>%
+
+  dat <- votes_df
+
+  if(nrow(dat) == 0) {
+    return(NULL)
+  }
+
+  dat <- dat %>%
     rename_with(~ gsub("\\.", " ", .x)) %>%  
     rowwise() %>%
     mutate(across(any_of(s_names), ~ case_when(
