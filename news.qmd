@@ -1,0 +1,43 @@
+---
+title: "News"
+format: 
+  html:
+    page-layout: full
+
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+library(gt)
+library(tidyverse)
+
+
+news_csv <- "files/csvs/journalist_list.csv"
+news <- read_csv(news_csv)
+
+news <- news %>%
+  mutate(Newspaper = sprintf("[%s](%s)", Newspaper, Link)) %>%
+  select(-Link)
+
+news %>%
+  gt() %>%
+  fmt_markdown(columns = Newspaper) %>%
+  cols_label(
+    Newspaper = ""
+  ) %>%
+  tab_header(
+    title = "Newspapers",
+    subtitle = "Clink on name to view articles from that outlet"
+  ) %>%
+  opt_interactive(
+    use_sorting = TRUE,
+    use_search = TRUE,
+    use_filters = FALSE,
+    use_resizers = TRUE
+  ) %>%
+  opt_row_striping()
+
+```

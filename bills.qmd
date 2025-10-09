@@ -10,8 +10,6 @@ execute:
   message: false
 ---
 
-EXAMPLE BILLS
-
 ```{r}
 library(gt)
 library(tidyverse)
@@ -203,7 +201,6 @@ bills_table %>%
       use_search = TRUE,
       use_filters = FALSE,
       use_resizers = TRUE,
-      use_highlight = TRUE,
       page_size_default = 20
     ) %>%
     opt_row_striping()

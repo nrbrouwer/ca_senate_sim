@@ -1,5 +1,0 @@
----
-title: "About"
----
-
-This website is a test for hosting simulation information on a public webpage.
