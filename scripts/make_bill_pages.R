@@ -126,9 +126,32 @@ if(!is.null(matches) && nrow(matches) > 0) {
   matches_code <- "data.frame()"
 }
   
-  b_qmd_path <- file.path(b_pages_dir, paste0(url, ".qmd"))
-  pdf_rel  <- file.path("..", bills_dir, paste0(url, ".pdf"))
-  s_qmd_path <- file.path("..", s_pages_dir, paste0("district_", district, ".qmd"))
+b_qmd_path <- file.path(b_pages_dir, paste0(url, ".qmd"))
+pdf_rel  <- file.path("..", bills_dir, paste0(url, ".pdf"))
+s_qmd_path <- file.path("..", s_pages_dir, paste0("district_", district, ".qmd"))
+
+  
+# Finding older verions of bills 
+prev_bills_dir <- "files/pdfs/previous_bills"
+prev_pattern <- paste0("^", url, "_v[0-9]+\\.pdf$")
+
+if (dir.exists(prev_bills_dir)) {
+  prev_files <- list.files(prev_bills_dir, pattern = prev_pattern, full.names = FALSE)
+  
+  # Extract version numbers and sort descending (newest first)
+  if (length(prev_files) > 0) {
+    prev_versions <- as.numeric(gsub(paste0("^", url, "_v([0-9]+)\\.pdf$"), "\\1", prev_files))
+    prev_df <- data.frame(
+      file = prev_files,
+      version = prev_versions
+    ) %>%
+      arrange(desc(version))
+  } else {
+    prev_df <- data.frame()
+  }
+} else {
+  prev_df <- data.frame()
+}
   
   yaml <- c(
     "---",
@@ -191,10 +214,36 @@ if(!is.null(matches) && nrow(matches) > 0) {
     "}",
     "",
     "```",
-    "",
-    ":::",
-    ""
-  )
+  "",
+  "## Previous Text",
+  "",
+  if (nrow(prev_df) > 0) {
+    c(
+      "::: {.panel-tabset}",
+      "",
+      # Generate sub-tabs for each previous version
+      unlist(lapply(seq_len(nrow(prev_df)), function(j) {
+        v_num <- prev_df$version[j]
+        v_file <- prev_df$file[j]
+        v_path <- file.path("..", prev_bills_dir, v_file)
+        
+        c(
+          sprintf("### Version %d", v_num),
+          "",
+          sprintf('<iframe src="%s" width="100%%" height="600px"></iframe>', v_path),
+          ""
+        )
+      })),
+      ":::",
+      ""
+    )
+  } else {
+    "No previous versions available for this bill."
+  },
+  "",
+  ":::",
+  ""
+)
  
   cat(paste(c(yaml, body), collapse = "\n"), file = b_qmd_path)
 }
