@@ -59,28 +59,37 @@ clean_votes <- function(votes_df){
   dat <- dat %>%
     rename_with(~ gsub("\\.", " ", .x)) %>%  
     rowwise() %>%
-    mutate(across(any_of(s_names), ~ case_when(
-            .x == 1 ~ "Aye",
-            .x == 0 ~ "No",
-            .default = "—"
-          )),   
-          Bill = as.character(Bill),
-          yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
-          no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
-          absent = sum(c_across(any_of(s_names)) == "—", na.rm = TRUE),
-          Vote = paste(yes, no, absent, sep = "-"),
-          d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
-          d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
-          d_absent = sum(c_across(any_of(d_sen)) == "—", na.rm = TRUE),
-          Dem_vote = paste(d_yes, d_no, d_absent, sep = "-"),
-          Dem_percent = round((d_yes/(d_yes + d_no + d_absent)*100)),
-          Dem_percent_sign = paste0(Dem_percent, "%"),
-          r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
-          r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
-          r_absent = sum(c_across(any_of(r_sen)) == "—", na.rm = TRUE),
-          Rep_vote = paste(r_yes, r_no, r_absent, sep = "-"),
-          Rep_percent = round((r_yes/(r_yes + r_no + r_absent)*100)),
-          Rep_percent_sign = paste0(Rep_percent, "%")
+    mutate(
+      Bill = as.character(Bill),
+      yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
+      no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
+      abstain = sum(c_across(any_of(s_names)) == "Abstain", na.rm = TRUE),
+      absent = sum(c_across(any_of(s_names)) == "" | is.na(c_across(any_of(s_names)))),
+      Vote = paste(yes, no, abstain, absent, sep = "-"),
+      d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
+      d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
+      d_abstain = sum(c_across(any_of(d_sen)) == "Abstain", na.rm = TRUE),
+      d_absent = sum(c_across(any_of(d_sen)) == "" | is.na(c_across(any_of(d_sen)))),
+      Dem_vote = paste(d_yes, d_no, d_abstain, d_absent, sep = "-"),
+      Dem_percent = round((d_yes/(d_yes + d_no + d_abstain + d_absent)*100)),
+      Dem_percent_sign = paste0(Dem_percent, "%"),
+      Dem_choice = case_when(
+        pmax(d_yes, d_no, d_abstain) == d_yes ~ "Aye",
+        pmax(d_yes, d_no, d_abstain) == d_no ~ "No",
+        pmax(d_yes, d_no, d_abstain) == d_abstain ~ "Abstain"
+      ),
+      r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
+      r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
+      r_abstain = sum(c_across(any_of(r_sen)) == "Abstain", na.rm = TRUE),
+      r_absent = sum(c_across(any_of(r_sen)) == "" | is.na(c_across(any_of(r_sen)))),
+      Rep_vote = paste(r_yes, r_no, r_abstain, r_absent, sep = "-"),
+      Rep_percent = round((r_yes/(r_yes + r_no + r_abstain + r_absent)*100)),
+      Rep_percent_sign = paste0(Rep_percent, "%"),
+      Rep_choice = case_when(
+        pmax(r_yes, r_no, r_abstain) == r_yes ~ "Aye",
+        pmax(r_yes, r_no, r_abstain) == r_no ~ "No",
+        pmax(r_yes, r_no, r_abstain) == r_abstain ~ "Abstain"
+      )
           ) %>%
     ungroup()
 }
@@ -116,7 +125,8 @@ for (i in seq_len(nrow(senators))) {
   name <- senators$Name[i]
   party <- senators$Party[i]
 
-party_match <- ifelse(party == "D", "Dem_percent", "Rep_percent")
+party_choice <- ifelse(party == "D", "Dem_choice", "Rep_choice")
+party_percent <- ifelse(party == "D", "Dem_percent", "Rep_percent")
 
 committees <- sapply(votes, function(df) name %in% names(df))
 committees <- which(committees)
@@ -154,15 +164,12 @@ if(length(votes_including_s) > 0) {
   # Check if Date column exists after binding
   if("Date" %in% colnames(votes_including_s) && name %in% colnames(votes_including_s)) {
     votes_including_s <- votes_including_s %>%
-      select(Date, Bill, Committee, all_of(name), all_of(party_match)) %>%  # Use all_of() for variables
-      mutate(party_percent = paste0(.data[[party_match]], "%"),
-        party_vote = ifelse(.data[[party_match]] >= 50, 1, 0),
+      select(Date, Bill, Committee, all_of(name), all_of(party_choice)) %>%  
+      mutate(
         party_aligned = case_when(
-          party_vote == 1 & .data[[name]] == "Aye" ~ "Yes",
-          party_vote == 0 & .data[[name]] == "No" ~ "Yes",
-          party_vote == 1 & .data[[name]] == "No" ~ "No",
-          party_vote == 0 & .data[[name]] == "Aye" ~ "No",
-          TRUE ~ ""
+          .data[[party_choice]] == .data[[name]]  ~ "Yes",
+          is.na(.data[[name]]) ~ "Absent",
+          TRUE ~ "No"
         ),
         Committee = case_when(
           Committee == "lgl" ~ "Local Government and Labor",
@@ -172,10 +179,10 @@ if(length(votes_including_s) > 0) {
           Committee == "floor" ~ "Floor",
           TRUE ~ ""
         )) %>%
-      select(Date, Bill, Committee, all_of(name), party_percent, party_aligned) %>%  # Use all_of() here too
+      select(Date, Bill, Committee, all_of(name), party_choice, party_aligned) %>%  # Use all_of() here too
       rename("Vote" = all_of(name),  # And here
-        "Party Vote" = party_percent,
-        "Party Aligned" = party_aligned)  %>%
+        "Party Vote" = party_choice,
+        "Voted With Party?" = party_aligned)  %>%
       arrange(desc(Date))
   } else {
     # Handle case where columns don't exist
@@ -249,13 +256,10 @@ vote_table <- if(nrow(votes_including_s) > 0) {
     "",
     "if(nrow(votes_including_s) > 0) {",
     "",
-    "  # Replace empty strings with 'Absent' for better handling",
-    "  votes_including_s$`Party Aligned`[votes_including_s$`Party Aligned` == ''] <- 'Absent'",
-    "",
     "  # Create complete factor levels to ensure all categories appear",
-    "  votes_including_s$`Party Aligned` <- factor(votes_including_s$`Party Aligned`, levels = c('Yes', 'No', 'Absent'))",
+    "  votes_including_s$`Party Vote` <- factor(votes_including_s$`Party Vote`, levels = c('Yes', 'No', 'Absent'))",
     "",
-    "  party_df <- data.frame(table(votes_including_s$`Party Aligned`))",
+    "  party_df <- data.frame(table(votes_including_s$`Party Vote`))",
     "  names(party_df) <- c('alignment', 'count')",
     "  party_df$percentage <- round(party_df$count / sum(party_df$count) * 100, 1)",
     "",
