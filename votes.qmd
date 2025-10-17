@@ -20,7 +20,7 @@ library(janitor)
 
 bills_csv <- "files/csvs/bill_list.csv"
 senator_csv <- "files/csvs/senator_list.csv"
-b_pages_dir  <- "ca_senate_sim/bills-pages"
+b_pages_dir  <- "bills-pages"
 
 senators <- read.csv(senator_csv)
 senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
