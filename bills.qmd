@@ -180,7 +180,7 @@ bills_table %>%
       use_filters = FALSE,
       use_resizers = TRUE,
       use_highlight = TRUE,
-      page_size_default = 20
+      page_size_default = 5
     ) %>%
     opt_row_striping()
 } else {

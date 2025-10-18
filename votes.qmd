@@ -80,7 +80,7 @@ process_votes_table <- function(votes_csv){
       table.width = pct(100)  # Force table to use full width
     ) %>%
     cols_label(
-      Vote = "Vote (Aye-No-Abstain-Absent)"
+      Vote = "Vote (Aye-No-Abstain-Absent)",
       Dem_percent_sign = "Democrat Support",
       Rep_percent_sign = "Republican Support"
     ) %>%
