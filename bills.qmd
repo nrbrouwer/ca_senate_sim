@@ -151,6 +151,10 @@ bills_table <- bills %>%
 if(length(votes) > 0) {
 bills_table %>%
   gt() %>% 
+  sub_missing(
+    columns = everything(),
+    missing_text = ""
+  ) %>%
   fmt_markdown(columns = c("PDF", "Page")) %>%
   cols_label(
     bill_measure = "Bill",
@@ -161,7 +165,7 @@ bills_table %>%
     appropriations = "Appropriations",
     Page = "Bill Details",
     PDF = "PDF",
-    Vote = "Recent Vote",
+    Vote = "Recent Vote (Aye-No-Abstain-Absent)",
     Date = "Vote Date", 
     source = "Voting Committee",
     Result = "Vote Result"
@@ -202,7 +206,7 @@ bills_table %>%
       use_search = TRUE,
       use_filters = FALSE,
       use_resizers = TRUE,
-      page_size_default = 20
+      page_size_default = 5
     ) %>%
     opt_row_striping()
 }
