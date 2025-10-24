@@ -38,6 +38,8 @@ jobs:
             any::knitr
             any::rmarkdown
             any::googlesheets4
+            any::bslib
+            any::bsicons
             
       - name: Render Quarto site
         uses: quarto-dev/quarto-actions/render@v2
