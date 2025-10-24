@@ -3,6 +3,7 @@ project:
   pre-render:
     - Rscript scripts/make_bill_pages.R
     - Rscript scripts/make_senator_pages.R
+    - Rscript scripts/make_lobby_pages.R
   
 
 resources:
@@ -24,8 +25,11 @@ website:
         href: map.qmd
       - text: Agendas
         href: agendas.qmd
+      - text: Lobby
+        href: lobby.qmd
       - text: News
         href: news.qmd
+
 
 format:
   html:
