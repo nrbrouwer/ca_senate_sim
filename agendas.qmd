@@ -1,0 +1,75 @@
+---
+title: "Agendas"
+format: 
+  html:
+    page-layout: full
+
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+library(gt)
+library(dplyr)
+
+agendas_csv <- "files/csvs/committee_agendas.csv"
+agendas_dir  <- "files/pdfs/agendas/"
+
+agendas <- read.csv(agendas_csv)
+
+if(nrow(agendas) == 0) {
+  cat("Committee agendas have not been set.")
+} else {
+  committee_fullnames <- c(
+    "lgl" = "Local Government and Labor",
+    "anr" = "Agriculture and Natural Resources",
+    "blh" = "Business, Law, and Health",
+    "app" = "Appropriations"
+  )
+  
+  agendas <- agendas %>%
+    mutate(
+      # Convert date to proper format and extract components
+      date_obj = as.Date(Meeting.Date, format = "%m/%d/%y"),  # Adjust format if needed
+      month = format(date_obj, "%m"),
+      day = format(date_obj, "%d"),
+      year = format(date_obj, "%y"),
+      
+      # Create PDF filename
+      pdf_filename = paste0(Committee, "_", month, "_", day, "_", year, ".pdf"),
+      
+      # Create link to PDF
+      Agenda_Link = paste0("[View Agenda](", agendas_dir, pdf_filename, ")"),
+      
+      # Translate committee code to full name
+      Committee_Name = committee_fullnames[Committee]
+    ) %>%
+    select(Meeting.Date, Committee_Name, Agenda_Link) %>%
+    arrange(desc(Meeting.Date))
+  
+  # Create the table
+  agendas %>%
+    gt() %>%
+    cols_label(
+      Meeting.Date = "Meeting Date",
+      Committee_Name = "Committee",
+      Agenda_Link = "Agenda"
+    ) %>%
+    fmt_markdown(columns = Agenda_Link) %>%
+    cols_align(align = "left", columns = everything()) %>%
+    tab_header(
+      title = "Committee Agendas",
+      subtitle = "Click to view agenda PDFs"
+    ) %>%
+    opt_interactive(
+      use_sorting = TRUE,
+      use_filters = FALSE,
+      use_resizers = TRUE,
+      page_size_default = 20
+    ) %>%
+    opt_row_striping()
+}
+```
+

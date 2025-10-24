@@ -22,6 +22,8 @@ website:
         href: votes.qmd
       - text: Districts
         href: map.qmd
+      - text: Agendas
+        href: agendas.qmd
       - text: News
         href: news.qmd
 
