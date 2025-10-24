@@ -25,6 +25,7 @@ b_pages_dir  <- "bills-pages"
 senators <- read.csv(senator_csv)
 senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
 senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
+senators$lastname_nospace <- gsub(" ", "_", senators$Last.Name)
 s_names <- senators$Name
 d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
@@ -67,7 +68,7 @@ process_votes_table <- function(votes_csv){
           Rep_percent_sign = paste0(Rep_percent, "%")
           ) %>%
     left_join(bills, by = c("Bill" = "bill_numbersb")) %>%
-    mutate(billnumname = paste0(toupper(Last.Name), "_SB", bill_number),
+    mutate(billnumname = paste0(toupper(lastname_nospace), "_SB", bill_number),
           Bill = sprintf("[%s](/%s/%s.html)", Bill, b_pages_dir, billnumname)) %>%
     select(Date, Bill, Vote, Result, Dem_percent_sign, Rep_percent_sign, any_of(s_names)) %>%
     arrange(desc(Date))
