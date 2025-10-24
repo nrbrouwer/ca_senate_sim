@@ -108,7 +108,6 @@ for (i in seq_len(nrow(lobbys))) {
     "    opt_interactive(",
     "      use_sorting = TRUE,",
     "      use_search = TRUE,",
-    "      use_filters = TRUE",
     "    ) %>%",
     "    opt_row_striping()",
     "} else {",

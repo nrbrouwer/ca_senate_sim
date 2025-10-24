@@ -21,7 +21,7 @@ letters_dir  <- "files/pdfs/lobbyist_letters/"
 
 lobbys <- read.csv(lobby_csv)
 
-lobbys$link <- paste0("[", lobbys$Lobby, "](lobbyist-page/", lobbys$Code, ".html)")
+lobbys$link <- paste0("[", lobbys$Lobby, "](lobby-pages/", toupper(lobbys$Code), ".html)")
 
 markdown_columns <- c("link") 
 columns_to_hide <- c("Code", "Lobby")
