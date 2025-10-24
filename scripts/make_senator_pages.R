@@ -48,6 +48,7 @@ senator_bills <- senators %>%
 
 #votes data
 
+
 clean_votes <- function(votes_df){
 
   dat <- votes_df
@@ -125,89 +126,45 @@ for (i in seq_len(nrow(senators))) {
   name <- senators$Name[i]
   party <- senators$Party[i]
 
-party_choice <- ifelse(party == "D", "Dem_choice", "Rep_choice")
-party_percent <- ifelse(party == "D", "Dem_percent", "Rep_percent")
+  party_choice <- ifelse(party == "D", "Dem_choice", "Rep_choice")
+  party_percent <- ifelse(party == "D", "Dem_percent", "Rep_percent")
 
-committees <- sapply(votes, function(df) name %in% names(df))
-committees <- which(committees)
-committee_names <- names(votes)[committees]
+  committee_assignments <- senators$Committee[i]
+  chair_assignment <- senators$Chair[i]
+  vice_chair_assignment <- senators$Vice.Chair[i]
 
-committee_fullnames <- c(
-  "lgl" = "Local Government and Labor",
-  "anr" = "Agriculture and Natural Resources", 
-  "blh" = "Business, Law, and Health",
-  "app" = "Appropriations",
-  "floor" = "Floor"
-)
-committee_names <- committee_fullnames[committee_names]
-committee_names <- committee_names[committee_names != "Floor"]
+  committee_fullnames <- c(
+    "lgl" = "Local Government and Labor",
+    "anr" = "Agriculture and Natural Resources", 
+    "blh" = "Business, Law, and Health",
+    "app" = "Appropriations"
+  )
 
-committee_names <- paste(committee_names,  collapse = "; ")
-
-votes_including_s <- votes[committees]
-# Keep only non-empty dataframes
-votes_including_s <- Filter(function(df) {
-  !is.null(df) && is.data.frame(df) && nrow(df) > 0
-}, votes_including_s)
-  
-
-# Check if we have any dataframes left
-if(length(votes_including_s) > 0) {
-  # Debug: check what columns each dataframe has
-  cat("Columns in each dataframe:\n")
-  lapply(names(votes_including_s), function(name) {
-    cat(name, ":", paste(colnames(votes_including_s[[name]]), collapse = ", "), "\n")
-  })
-  
-  votes_including_s <- bind_rows(votes_including_s, .id = "Committee")
-  
-  # Check if Date column exists after binding
-  if("Date" %in% colnames(votes_including_s) && name %in% colnames(votes_including_s)) {
-    votes_including_s <- votes_including_s %>%
-      select(Date, Bill, Committee, all_of(name), all_of(party_choice)) %>%  
-      mutate(
-        party_aligned = case_when(
-          .data[[party_choice]] == .data[[name]]  ~ "Yes",
-          is.na(.data[[name]]) ~ "Absent",
-          TRUE ~ "No"
-        ),
-        Committee = case_when(
-          Committee == "lgl" ~ "Local Government and Labor",
-          Committee == "anr" ~ "Agriculture and Natural Resources", 
-          Committee == "blh" ~ "Business, Law, and Health",
-          Committee == "app" ~ "Appropriations",
-          Committee == "floor" ~ "Floor",
-          TRUE ~ ""
-        )) %>%
-      select(Date, Bill, Committee, all_of(name), party_choice, party_aligned) %>%  # Use all_of() here too
-      rename("Vote" = all_of(name),  # And here
-        "Party Vote" = party_choice,
-        "Voted With Party?" = party_aligned)  %>%
-      arrange(desc(Date))
+  if(!is.na(committee_assignments) && committee_assignments != "") {
+    committee_codes <- trimws(unlist(strsplit(committee_assignments, ";")))
+    committee_names <- committee_fullnames[committee_codes]
+    
+    # Add Chair or Vice Chair prefix if applicable
+    for(j in seq_along(committee_codes)) {
+      if(!is.na(chair_assignment) && committee_codes[j] == chair_assignment) {
+        committee_names[j] <- paste("Chair,", committee_names[j])
+      } else if(!is.na(vice_chair_assignment) && committee_codes[j] == vice_chair_assignment) {
+        committee_names[j] <- paste("Vice Chair,", committee_names[j])
+      }
+    }
+    
+    committees_yaml <- paste(committee_names, collapse = "  \n")
   } else {
-    # Handle case where columns don't exist
-    votes_including_s <- data.frame()
+    committees_yaml <- "No Committee Assignments"
   }
-} else {
-  # No dataframes with data for this senator
-  votes_including_s <- data.frame()
-}
 
-
-  
-vote_table <- if(nrow(votes_including_s) > 0) {
-  votes_str <- capture.output(dput(votes_including_s))
-  paste(votes_str, collapse = "\n")
-} else {
-  "data.frame()"
-}
   
   s_qmd_path <- file.path(s_pages_dir, paste0("district_", senator_id, ".qmd"))
   pdf_rel  <- file.path("..", senator_dir, paste0(name_link, "_", senator_id, "_profile.pdf"))
-
+  
   b_qmd_path1 <- file.path("..", b_pages_dir, paste0(toupper(name_link), "_SB", bill1, ".qmd"))
   b_qmd_path2 <- file.path("..", b_pages_dir, paste0(toupper(name_link), "_SB", bill2, ".qmd"))
-
+  
   bill_links <- c()
   if(!is.na(bill1)) {
     bill_links <- c(bill_links, sprintf("[%s](%s)", bill_measure1, b_qmd_path1))
@@ -215,6 +172,73 @@ vote_table <- if(nrow(votes_including_s) > 0) {
   if(!is.na(bill2)) {
     bill_links <- c(bill_links, sprintf("[%s](%s)", bill_measure2, b_qmd_path2))
   }
+  
+  bill_links_yaml <- paste(bill_links, collapse = "  \n")
+
+  # This is all for finding the votes the senator has taken
+    committees <- sapply(votes, function(df) name %in% names(df))
+    ommittees <- which(committees)
+
+    votes_including_s <- votes[committees]
+    # Keep only non-empty dataframes
+    votes_including_s <- Filter(function(df) {
+      !is.null(df) && is.data.frame(df) && nrow(df) > 0
+    }, votes_including_s)
+  
+
+    # Check if we have any dataframes left
+    if(length(votes_including_s) > 0) {
+      # Debug: check what columns each dataframe has
+      cat("Columns in each dataframe:\n")
+      lapply(names(votes_including_s), function(name) {
+        cat(name, ":", paste(colnames(votes_including_s[[name]]), collapse = ", "), "\n")
+      })
+  
+      votes_including_s <- bind_rows(votes_including_s, .id = "Committee")
+  
+    # Check if Date column exists after binding
+    if("Date" %in% colnames(votes_including_s) && name %in% colnames(votes_including_s)) {
+      votes_including_s <- votes_including_s %>%
+        select(Date, Bill, Committee, all_of(name), all_of(party_choice)) %>%  
+        mutate(
+          party_aligned = case_when(
+            .data[[party_choice]] == .data[[name]]  ~ "Yes",
+            is.na(.data[[name]]) ~ "Absent",
+            TRUE ~ "No"
+          ),
+          Committee = case_when(
+            Committee == "lgl" ~ "Local Government and Labor",
+            Committee == "anr" ~ "Agriculture and Natural Resources", 
+            Committee == "blh" ~ "Business, Law, and Health",
+            Committee == "app" ~ "Appropriations",
+            Committee == "floor" ~ "Floor",
+            TRUE ~ ""
+          )) %>%
+        select(Date, Bill, Committee, all_of(name), party_choice, party_aligned) %>%  # Use all_of() here too
+        rename("Vote" = all_of(name),  # And here
+          "Party Vote" = party_choice,
+          "Voted With Party?" = party_aligned)  %>%
+        arrange(desc(Date))
+    } else {
+      # Handle case where columns don't exist
+      votes_including_s <- data.frame()
+    }
+    } else {
+      # No dataframes with data for this senator
+      votes_including_s <- data.frame()
+    }
+
+
+  
+    vote_table <- if(nrow(votes_including_s) > 0) {
+      votes_str <- capture.output(dput(votes_including_s))
+      paste(votes_str, collapse = "\n") 
+    } else {
+      "data.frame()"
+    }
+
+  
+  # Constructing the actual pages
 
   yaml <- c(
     "---",
@@ -232,11 +256,11 @@ vote_table <- if(nrow(votes_including_s) > 0) {
     "",
     sprintf("**District:** %s", senator_id),
     "",
-    sprintf("**Committee Assignments:** %s", committee_names),
+    sprintf("**Committee Assignments:** %s", committees_yaml),
     "",
     "**Bills:**",
     "",
-    bill_links,
+    bill_links_yaml,
     "",
     sprintf("[View Profile](%s)", pdf_rel),
     "",
@@ -251,54 +275,65 @@ vote_table <- if(nrow(votes_including_s) > 0) {
     "",
     "library(tidyverse)",
     "library(gt)",
+    "library(bslib)",
+    "library(bsicons)",
     "",
     paste("votes_including_s <-", vote_table),
     "",
-    "if(nrow(votes_including_s) > 0) {",
     "",
-    "  # Create complete factor levels to ensure all categories appear",
-    "  votes_including_s$`Party Vote` <- factor(votes_including_s$`Party Vote`, levels = c('Yes', 'No', 'Absent'))",
-    "",
-    "  party_df <- data.frame(table(votes_including_s$`Party Vote`))",
-    "  names(party_df) <- c('alignment', 'count')",
-    "  party_df$percentage <- round(party_df$count / sum(party_df$count) * 100, 1)",
-    "",
-    "  # Filter out zero counts for the pie chart display, but keep them for legend",
-    "  party_df_display <- party_df",
-    "  party_df_display$alignment <- as.character(party_df_display$alignment)",
-    "",
-    "  pie_chart <- ggplot(party_df_display, aes(x = '', y = count, fill = alignment)) +",
-    "    geom_bar(stat = 'identity', width = 1) +",
-    "    coord_polar('y', start = 0) +",
-    "    theme_void() +",
-    "    labs(title = 'Senator-Party Alignment Breakdown') +",
-    "    scale_fill_manual(name = 'Alignment', ",
-    "                      values = c('Yes' = 'green', 'No' = 'red', 'Absent' = 'gray'),",
-    "                      limits = c('Yes', 'No', 'Absent'), ",
-    "                      drop = FALSE) +",
-    "    geom_text(aes(label = ifelse(count > 0, paste0(percentage, '%'), '')),",
-    "              position = position_stack(vjust = 0.5))",
-    "",
-    "  print(pie_chart)",
-    "",
-    "  votes_including_s %>%",
-    "    gt() %>%",
-    "    tab_header(",
-    "      title = 'Vote History',",
-    "      subtitle = 'Sorted by newer to older votes'",
-    "    ) %>%",
-    "    opt_interactive(",
-    "      use_sorting = TRUE,",
-    "      use_highlight = TRUE",
-    "    ) %>%",
-    "    opt_row_striping()",
-    "} else {",
-    "  cat('No vote history available for this bill.')",
-    "}",
-    "",
-    "```",
-    "",
-    ":::",
+  "if(nrow(votes_including_s) > 0) {",
+  "",
+  "  # Calculate metrics",
+  "  total_votes <- nrow(votes_including_s)",
+  "  aligned_votes <- sum(votes_including_s$`Voted With Party?` == 'Yes', na.rm = TRUE)",
+  "  against_votes <- sum(votes_including_s$`Voted With Party?` == 'No', na.rm = TRUE)",
+  "  absent_votes <- sum(votes_including_s$`Voted With Party?` == 'Absent', na.rm = TRUE)",
+  "  alignment_pct <- round((aligned_votes / total_votes) * 100, 1)",
+  "",
+  "  # Create value boxes layout",
+  "  layout_column_wrap(",
+  "    width = 1/3,",
+  "    value_box(",
+  "      title = 'Voted With Party',",
+  "      value = paste0(alignment_pct, '%'),",
+  "      showcase = bs_icon('check-circle-fill'),",
+  "      theme = 'success',",
+  "      paste(aligned_votes, 'of', total_votes, 'votes')",
+  "    ),",
+  "    value_box(",
+  "      title = 'Voted Against Party',",
+  "      value = against_votes,",
+  "      showcase = bs_icon('x-circle-fill'),",
+  "      theme = 'danger',",
+  "      paste0(round((against_votes/total_votes)*100, 1), '% of votes')",
+  "    ),",
+  "    value_box(",
+  "      title = 'Missed Votes',",
+  "      value = absent_votes,",
+  "      showcase = bs_icon('dash-circle-fill'),",
+  "      theme = 'secondary',",
+  "      paste0(round((absent_votes/total_votes)*100, 1), '% of votes')",
+  "    )",
+  "  )",
+  "",
+  "  votes_including_s %>%",
+  "    gt() %>%",
+  "    tab_header(",
+  "      title = 'Vote History',",
+  "      subtitle = 'Sorted by newer to older votes'",
+  "    ) %>%",
+  "    opt_interactive(",
+  "      use_sorting = TRUE,",
+  "      use_highlight = TRUE",
+  "    ) %>%",
+  "    opt_row_striping()",
+  "} else {",
+  "  cat('No vote history available for this senator.')",
+  "}",
+  "",
+  "```",
+  "",
+  ":::",
     ""
   )
   

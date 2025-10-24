@@ -24,6 +24,10 @@ senators <- senators %>%
 profile_folder_has_files <- dir.exists("files/pdfs/role_profiles/senators") && 
                            length(list.files("files/pdfs/role_profiles/senators")) > 0
 
+# Check if Leadership roles are in
+leadership_has_data <- "Leadership" %in% names(senators) && 
+                       any(!is.na(senators$Leadership))                          
+
 # Adding name column which links to specific senator page
 senators$Name_Link <- paste0("[", senators$name, "](senator-pages/district_", senators$District, ".html)")
 
@@ -38,14 +42,18 @@ if (profile_folder_has_files) {
   markdown_columns <- c(markdown_columns, "Profile")
 }
 
-
+# Build columns to hide dynamically
+columns_to_hide <- c("namesmatch", "First.Name", "Last.Name", "name", "Committee", "Chair", "Vice.Chair")
+if (!leadership_has_data) {
+  columns_to_hide <- c(columns_to_hide, "Leadership")
+}
 
 # Create the table
 senators %>%
   gt() %>%
-  cols_hide(columns = c("namesmatch", "First.Name", "Last.Name", "name")) %>%
+  cols_hide(columns = all_of(columns_to_hide)) %>%
   cols_label(
-    District = "District Number",
+    District = "District",
     Name_Link = "Name",
     Party = "Party"
   ) %>%
