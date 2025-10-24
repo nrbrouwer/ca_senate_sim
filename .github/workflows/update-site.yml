@@ -39,6 +39,7 @@ jobs:
             any::rmarkdown
             any::googlesheets4
             any::shiny
+            any::plotly
             any::bslib
             any::bsicons
             any::htmltools
