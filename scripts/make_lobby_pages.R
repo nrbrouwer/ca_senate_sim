@@ -64,7 +64,7 @@ for (i in seq_len(nrow(lobbys))) {
   }
   
   # Create the QMD file path
-  lobby_qmd_path <- file.path(make_lobby_pages, paste0(lobby_code, ".qmd"))
+  lobby_qmd_path <- file.path(l_pages_dir, paste0(lobby_code, ".qmd"))
   
   # Build YAML header
   yaml <- c(
@@ -96,12 +96,12 @@ for (i in seq_len(nrow(lobbys))) {
     "if(nrow(letters_df) > 0) {",
     "  letters_df %>%",
     "    gt() %>%",
+    "    fmt_markdown(columns = Letter_Link, Letter_link) %>%",
     "    cols_label(",
-    "      bill_measure = 'Bill',",
+    "      Bill_Link = 'Bill',",
     "      Position = 'Position',",
     "      Letter_Link = 'Letter'",
     "    ) %>%",
-    "    fmt_markdown(columns = Letter_Link) %>%",
     "    tab_header(",
     "      title = 'Position Letters'",
     "    ) %>%",
