@@ -25,13 +25,13 @@ b_pages_dir  <- "bills-pages"
 senators <- read.csv(senator_csv)
 senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
 senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
-senators$lastname_nospace <- gsub(" ", "_", senators$Last.Name)
 s_names <- senators$Name
 d_sen <- senators$Name[senators$Party == "D"]
 r_sen <- senators$Name[senators$Party == "R"]
 
 bills <- read.csv(bills_csv)
 bills$bill_numbersb <- paste0("SB-", bills$bill_number)
+bills$lastname_nospace <- gsub(" ", "_", bills$Last.Name)
 
 # Function for creating final vote tables
 process_votes_table <- function(votes_csv){
