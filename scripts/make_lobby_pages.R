@@ -64,7 +64,7 @@ for (i in seq_len(nrow(lobbys))) {
   }
   
   # Create the QMD file path
-  lobby_qmd_path <- file.path(lobby_pages_dir, paste0(lobby_code, ".qmd"))
+  lobby_qmd_path <- file.path(make_lobby_pages, paste0(lobby_code, ".qmd"))
   
   # Build YAML header
   yaml <- c(
