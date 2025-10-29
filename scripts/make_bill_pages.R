@@ -266,7 +266,7 @@ if (dir.exists(prev_bills_dir)) {
 ")",
 "",
 "# Find lobbyist letters for this bill",
-"lobbyist_dir <- 'files/pdfs/lobbyist_letters'",
+"lobbyist_dir <- file.path('..', 'files', 'pdfs', 'lobbyist_letters')",
 "",
 sprintf("bill_pattern <- '_SB%s_(support|oppose)\\\\.pdf$'", number),
 "",
