@@ -13,13 +13,14 @@ execute:
 ```{r}
 library(gt)
 library(dplyr)
+library(stringr)
 
-agendas_csv <- "files/csvs/committee_agendas.csv"
-agendas_dir  <- "files/pdfs/agendas/"
+agendas_dir <- "files/pdfs/agendas/"
 
-agendas <- read.csv(agendas_csv)
+# Get list of PDF files in the directory
+pdf_files <- list.files(agendas_dir, pattern = "\\.pdf$", full.names = FALSE)
 
-if(nrow(agendas) == 0) {
+if(length(pdf_files) == 0) {
   cat("Committee agendas have not been set.")
 } else {
   committee_fullnames <- c(
@@ -29,25 +30,29 @@ if(nrow(agendas) == 0) {
     "app" = "Appropriations"
   )
   
-  agendas <- agendas %>%
+  # Parse filenames to extract information
+  agendas <- data.frame(filename = pdf_files) %>%
     mutate(
-      # Convert date to proper format and extract components
-      date_obj = as.Date(Meeting.Date, format = "%m/%d/%y"),  # Adjust format if needed
-      month = format(date_obj, "%m"),
-      day = format(date_obj, "%d"),
-      year = format(date_obj, "%y"),
+      # Extract committee code and date parts from filename
+      # Pattern: XXX_MM_DD_YY.pdf
+      Committee = str_extract(filename, "^[^_]+"),
+      month = str_extract(filename, "(?<=_)\\d{2}(?=_\\d{2}_\\d{2})"),
+      day = str_extract(filename, "(?<=_\\d{2}_)\\d{2}(?=_\\d{2})"),
+      year = str_extract(filename, "(?<=_\\d{2}_\\d{2}_)\\d{2}"),
       
-      # Create PDF filename
-      pdf_filename = paste0(Committee, "_", month, "_", day, "_", year, ".pdf"),
+      # Create date object and formatted date string
+      date_obj = as.Date(paste0("20", year, "-", month, "-", day)),
+      Meeting.Date = format(date_obj, "%m/%d/%y"),
       
       # Create link to PDF
-      Agenda_Link = paste0("[View Agenda](", agendas_dir, pdf_filename, ")"),
+      Agenda_Link = paste0("[View Agenda](", agendas_dir, filename, ")"),
       
       # Translate committee code to full name
       Committee_Name = committee_fullnames[Committee]
     ) %>%
-    select(Meeting.Date, Committee_Name, Agenda_Link) %>%
-    arrange(desc(Meeting.Date))
+    select(Meeting.Date, Committee_Name, Agenda_Link, date_obj) %>%
+    arrange(desc(date_obj)) %>%
+    select(-date_obj)
   
   # Create the table
   agendas %>%
