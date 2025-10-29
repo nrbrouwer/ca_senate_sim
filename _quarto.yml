@@ -25,7 +25,7 @@ website:
         href: map.qmd
       - text: Agendas
         href: agendas.qmd
-      - text: Lobby
+      - text: Lobbyists
         href: lobby.qmd
       - text: News
         href: news.qmd
