@@ -247,6 +247,7 @@ if (dir.exists(prev_bills_dir)) {
 "#| echo: false",
 "#| warning: false",
 "#| message: false",
+"#| results: asis",
 "",
 "library(dplyr)",
 "library(gt)",
