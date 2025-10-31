@@ -51,6 +51,7 @@ clean_votes <- function(votes_df){
 
   dat <- dat %>%
     rename_with(~ gsub("\\.", " ", .x)) %>%  
+    mutate(across(any_of(s_names), as.character)) %>%
     rowwise() %>%
     mutate(
           Bill = as.character(Bill),
