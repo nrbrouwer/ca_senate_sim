@@ -23,8 +23,11 @@ senators <- senators %>%
   mutate(Last.Name_Link = gsub(" ", "_", Last.Name))
 
 s_names <- senators$Name
+s_names_period <- make.names(s_names) #R doesn't like spaces, creates issues with names with hyphens, easiest to just work with "." instead of spaces and switch back for display later
 d_sen <- senators$Name[senators$Party == "D"]
+d_sen_period <- make.names(d_sen)
 r_sen <- senators$Name[senators$Party == "R"]
+r_sen_period <- make.names(r_sen)
           
 
 bills <- read.csv(bills_csv)
@@ -58,35 +61,34 @@ clean_votes <- function(votes_df){
   }
 
   dat <- dat %>%
-    rename_with(~ gsub("\\.", " ", .x)) %>%  
-    mutate(across(any_of(s_names), as.character)) %>%
+    mutate(across(any_of(s_names_period), as.character)) %>%
     rowwise() %>%
     mutate(
       Bill = as.character(Bill),
-      yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
-      no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
-      abstain = sum(c_across(any_of(s_names)) == "Abstain", na.rm = TRUE),
-      absent = sum(c_across(any_of(s_names)) == "" | is.na(c_across(any_of(s_names)))),
+      yes = sum(c_across(any_of(s_names_period)) == "Aye", na.rm = TRUE),
+      no = sum(c_across(any_of(s_names_period)) == "No", na.rm = TRUE),
+      abstain = sum(c_across(any_of(s_names_period)) == "Abstain", na.rm = TRUE),
+      absent = sum(c_across(any_of(s_names_period)) == "" | is.na(c_across(any_of(s_names_period)))),
       Vote = paste(yes, no, abstain, absent, sep = "-"),
-      d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
-      d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
-      d_abstain = sum(c_across(any_of(d_sen)) == "Abstain", na.rm = TRUE),
-      d_absent = sum(c_across(any_of(d_sen)) == "" | is.na(c_across(any_of(d_sen)))),
+      d_yes = sum(c_across(any_of(d_sen_period)) == "Aye", na.rm = TRUE),
+      d_no = sum(c_across(any_of(d_sen_period)) == "No", na.rm = TRUE),
+      d_abstain = sum(c_across(any_of(d_sen_period)) == "Abstain", na.rm = TRUE),
+      d_absent = sum(c_across(any_of(d_sen_period)) == "" | is.na(c_across(any_of(d_sen_period)))),
       Dem_vote = paste(d_yes, d_no, d_abstain, d_absent, sep = "-"),
       Dem_percent = round((d_yes/(d_yes + d_no + d_abstain + d_absent)*100)),
-      Dem_percent_sign = paste0(Dem_percent, "%"),
+      Dem_percent_sign = ifelse(is.nan(Dem_percent), "NA", paste0(Dem_percent, "%")),
       Dem_choice = case_when(
         pmax(d_yes, d_no, d_abstain) == d_yes ~ "Aye",
         pmax(d_yes, d_no, d_abstain) == d_no ~ "No",
         pmax(d_yes, d_no, d_abstain) == d_abstain ~ "Abstain"
       ),
-      r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
-      r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
-      r_abstain = sum(c_across(any_of(r_sen)) == "Abstain", na.rm = TRUE),
-      r_absent = sum(c_across(any_of(r_sen)) == "" | is.na(c_across(any_of(r_sen)))),
+      r_yes = sum(c_across(any_of(r_sen_period)) == "Aye", na.rm = TRUE),
+      r_no = sum(c_across(any_of(r_sen_period)) == "No", na.rm = TRUE),
+      r_abstain = sum(c_across(any_of(r_sen_period)) == "Abstain", na.rm = TRUE),
+      r_absent = sum(c_across(any_of(r_sen_period)) == "" | is.na(c_across(any_of(r_sen_period)))),
       Rep_vote = paste(r_yes, r_no, r_abstain, r_absent, sep = "-"),
       Rep_percent = round((r_yes/(r_yes + r_no + r_abstain + r_absent)*100)),
-      Rep_percent_sign = paste0(Rep_percent, "%"),
+      Rep_percent_sign = ifelse(is.nan(Rep_percent), "NA", paste0(Rep_percent, "%")),
       Rep_choice = case_when(
         pmax(r_yes, r_no, r_abstain) == r_yes ~ "Aye",
         pmax(r_yes, r_no, r_abstain) == r_no ~ "No",
@@ -125,6 +127,7 @@ for (i in seq_len(nrow(senators))) {
   bill_measure2 <- if(!is.na(bill2)) paste0("SB-", bill2) else NULL
 
   name <- senators$Name[i]
+  name_period <- s_names_period[i]
   party <- senators$Party[i]
 
   party_choice <- ifelse(party == "D", "Dem_choice", "Rep_choice")
@@ -177,8 +180,8 @@ for (i in seq_len(nrow(senators))) {
   bill_links_yaml <- paste(bill_links, collapse = "  \n")
 
   # This is all for finding the votes the senator has taken
-    committees <- sapply(votes, function(df) name %in% names(df))
-    ommittees <- which(committees)
+    committees <- sapply(votes, function(df) name_period %in% names(df))
+    committees <- which(committees)
 
     votes_including_s <- votes[committees]
     # Keep only non-empty dataframes
@@ -198,13 +201,13 @@ for (i in seq_len(nrow(senators))) {
       votes_including_s <- bind_rows(votes_including_s, .id = "Committee")
   
     # Check if Date column exists after binding
-    if("Date" %in% colnames(votes_including_s) && name %in% colnames(votes_including_s)) {
+    if("Date" %in% colnames(votes_including_s) & name_period %in% colnames(votes_including_s)) {
       votes_including_s <- votes_including_s %>%
-        select(Date, Bill, Committee, all_of(name), all_of(party_choice)) %>%  
+        select(Date, Bill, Committee, all_of(name_period), all_of(party_choice)) %>%  
         mutate(
           party_aligned = case_when(
-            .data[[party_choice]] == .data[[name]]  ~ "Yes",
-            is.na(.data[[name]]) | .data[[name]] == "" ~ "Absent",
+            .data[[party_choice]] == .data[[name_period]]  ~ "Yes",
+            is.na(.data[[name_period]]) | .data[[name_period]] == "" ~ "Absent",
             TRUE ~ "No"
           ),
           Committee = case_when(
@@ -215,8 +218,8 @@ for (i in seq_len(nrow(senators))) {
             Committee == "floor" ~ "Floor",
             TRUE ~ ""
           )) %>%
-        select(Date, Bill, Committee, all_of(name), party_choice, party_aligned) %>%  # Use all_of() here too
-        rename("Vote" = all_of(name),  # And here
+        select(Date, Bill, Committee, all_of(name_period), party_choice, party_aligned) %>%  
+        rename("Vote" = all_of(name_period),  # And here
           "Party Vote" = party_choice,
           "Voted With Party?" = party_aligned)  %>%
         arrange(desc(Date))

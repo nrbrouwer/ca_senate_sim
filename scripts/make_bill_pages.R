@@ -31,8 +31,11 @@ senators <- senators %>%
 senators$Name <- paste(senators$First.Name, senators$Last.Name, sep = " ")
 senators$Name <- trimws(gsub("\\s+", " ", senators$Name)) 
 s_names <- senators$Name
+s_names_period <- make.names(s_names) #R doesn't like spaces, creates issues with names with hyphens, easiest to just work with "." instead of spaces and switch back for display later
 d_sen <- senators$Name[senators$Party == "D"]
+d_sen_period <- make.names(d_sen)
 r_sen <- senators$Name[senators$Party == "R"]
+r_sen_period <- make.names(r_sen)
 
 senators <- senators %>%
   select(-First.Name, -Last.Name, -Name)
@@ -50,32 +53,31 @@ clean_votes <- function(votes_df){
   }
 
   dat <- dat %>%
-    rename_with(~ gsub("\\.", " ", .x)) %>%  
-    mutate(across(any_of(s_names), as.character)) %>%
+    mutate(across(any_of(s_names_period), as.character)) %>%
     rowwise() %>%
     mutate(
           Bill = as.character(Bill),
-          yes = sum(c_across(any_of(s_names)) == "Aye", na.rm = TRUE),
-          no = sum(c_across(any_of(s_names)) == "No", na.rm = TRUE),
-          abstain = sum(c_across(any_of(s_names)) == "Abstain", na.rm = TRUE),
-          absent = sum(c_across(any_of(s_names)) == "" | is.na(c_across(any_of(s_names)))),
+          yes = sum(c_across(any_of(s_names_period)) == "Aye", na.rm = TRUE),
+          no = sum(c_across(any_of(s_names_period)) == "No", na.rm = TRUE),
+          abstain = sum(c_across(any_of(s_names_period)) == "Abstain", na.rm = TRUE),
+          absent = sum(c_across(any_of(s_names_period)) == "" | is.na(c_across(any_of(s_names_period)))),
           Vote = paste(yes, no, abstain, absent, sep = "-"),
-          d_yes = sum(c_across(any_of(d_sen)) == "Aye", na.rm = TRUE),
-          d_no = sum(c_across(any_of(d_sen)) == "No", na.rm = TRUE),
-          d_abstain = sum(c_across(any_of(d_sen)) == "Abstain", na.rm = TRUE),
-          d_absent = sum(c_across(any_of(d_sen)) == "" | is.na(c_across(any_of(d_sen)))),
+          d_yes = sum(c_across(any_of(d_sen_period)) == "Aye", na.rm = TRUE),
+          d_no = sum(c_across(any_of(d_sen_period)) == "No", na.rm = TRUE),
+          d_abstain = sum(c_across(any_of(d_sen_period)) == "Abstain", na.rm = TRUE),
+          d_absent = sum(c_across(any_of(d_sen_period)) == "" | is.na(c_across(any_of(d_sen_period)))),
           Dem_vote = paste(d_yes, d_no, d_abstain, d_absent, sep = "-"),
           Dem_percent = round((d_yes/(d_yes + d_no + d_abstain)*100)),
-          Dem_percent_sign = paste0(Dem_percent, "%"),
-          r_yes = sum(c_across(any_of(r_sen)) == "Aye", na.rm = TRUE),
-          r_no = sum(c_across(any_of(r_sen)) == "No", na.rm = TRUE),
-          r_abstain = sum(c_across(any_of(r_sen)) == "Abstain", na.rm = TRUE),
-          r_absent = sum(c_across(any_of(r_sen)) == "" | is.na(c_across(any_of(r_sen)))),
+          Dem_percent_sign = ifelse(is.nan(Dem_percent), "NA", paste0(Dem_percent, "%")),
+          r_yes = sum(c_across(any_of(r_sen_period)) == "Aye", na.rm = TRUE),
+          r_no = sum(c_across(any_of(r_sen_period)) == "No", na.rm = TRUE),
+          r_abstain = sum(c_across(any_of(r_sen_period)) == "Abstain", na.rm = TRUE),
+          r_absent = sum(c_across(any_of(r_sen_period)) == "" | is.na(c_across(any_of(r_sen_period)))),
           Rep_vote = paste(r_yes, r_no, r_abstain, r_absent, sep = "-"),
           Rep_percent = round((r_yes/(r_yes + r_no + r_abstain)*100)),
-          Rep_percent_sign = paste0(Rep_percent, "%")
+          Rep_percent_sign = ifelse(is.nan(Rep_percent), "NA", paste0(Rep_percent, "%"))
           ) %>%
-    select(Date, Bill, Vote, Result, Dem_percent_sign, Rep_percent_sign, any_of(s_names))
+    select(Date, Bill, Vote, Result, Dem_percent_sign, Rep_percent_sign)
 }
 
 votes_lgl <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vSWsxVKMyPrvGZW1VFD0_DdTsMmH-dzITniXvWusbbG34FPwj7uWsIDB6B_6Sb5AdK94SbZ75eL0vTT/pub?gid=0&single=true&output=csv") 
